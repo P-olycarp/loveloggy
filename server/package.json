@@ -1,0 +1,25 @@
+{
+  "name": "loveloggy-server",
+  "version": "0.1.0",
+  "description": "Minimal backend for LoveLoggy (demo). Stores users, couples, keys and encrypted messages in a JSON file.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "lint": "eslint . || true",
+    "test": "node ./test/smoke.js || true"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "eslint": "^8.47.0"
+  }
+}

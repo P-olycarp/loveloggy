@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>LoveLoggy — Relationship Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'DM Sans', 'sans-serif']
+                    },
+                    colors: {
+                        sand: {
+                            100: '#F7F5F2',
+                            200: '#EBE7E0',
+                            300: '#A69C8E',
+                            400: '#A69C8E',
+                            500: '#8B7E74',
+                            600: '#5D5752',
+                        },
+                        clay: '#9E8C78',
+                        ios: {
+                            blue: '#007AFF',
+                            bg: '#EBE7E0',
+                            card: '#FFFFFF',
+                            separator: '#C6C6C8',
+                            text: '#000000',
+                            secondary: '#8E8E93',
+                            red: '#FF3B30',
+                            green: '#34C759'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar{display:none}
+        .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+        .ios-blur {
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+        @media (max-width: 380px) {
+            .nav-item span { font-size: 9px !important; }
+            .nav-item i { font-size: 18px !important; }
+        }
+    </style>
+    <script src="src/auth.js"></script>
+    <script src="src/settings.js"></script>
+</head>
+<body class="bg-ios-bg text-ios-text antialiased min-h-screen flex items-center justify-center pb-20">
+    <div class="w-full max-w-md bg-ios-card rounded-3xl shadow-lg p-6 border border-ios-separator/30">
+        <h1 class="text-2xl font-bold mb-2 text-ios-text">Relationship Profile</h1>
+        <p class="text-sm text-ios-secondary mb-4">Add your partner details so your shared space feels like home.</p>
+
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-ios-secondary">Partner name</label>
+                <button id="partnerNameEdit" type="button" class="text-xs text-ios-blue underline">Edit</button>
+            </div>
+            <input id="partnerName" class="w-full rounded-xl p-3 border border-ios-separator/30 bg-ios-bg text-ios-text" placeholder="Partner's full name">
+            <div id="partnerSavedMsg" class="text-xs text-ios-green hidden">Partner name saved</div>
+
+            <label class="text-xs font-bold text-ios-secondary">Anniversary date</label>
+            <input id="anniversary" type="date" class="w-full rounded-xl p-3 border border-ios-separator/30 bg-ios-bg text-ios-text">
+
+            <label class="text-xs font-bold text-ios-secondary">Optional photo</label>
+            <div class="flex items-center gap-3">
+                <input id="photoInput" type="file" accept="image/*" class="hidden">
+                <!-- small ios-blue-colored square with camera icon, and label to its right -->
+                <button id="uploadBtn" type="button" class="flex items-center gap-3 px-3 py-2 rounded-xl bg-ios-card border border-ios-separator/30 shadow-sm">
+                    <span class="w-10 h-10 rounded-md bg-ios-blue text-white flex items-center justify-center text-lg">📷</span>
+                    <span class="text-sm font-medium text-ios-text">Upload photo</span>
+                </button>
+                <div id="photoPreview" class="w-14 h-14 rounded-lg bg-ios-bg overflow-hidden border border-ios-separator/30"></div>
+                <div id="photoSavedMsg" class="text-xs text-ios-green hidden">Saved</div>
+            </div>
+
+            <label class="text-xs font-bold text-ios-secondary">Relationship status</label>
+            <select id="relationStatus" class="w-full rounded-xl p-3 border border-ios-separator/30 bg-ios-bg text-ios-text">
+                <option value="">Select status</option>
+                <option>Dating</option>
+                <option>Engaged</option>
+                <option>Married</option>
+                <option>It's complicated</option>
+                <option>Separated</option>
+            </select>
+        </div>
+
+        <div class="mt-6 flex justify-between items-center">
+            <button id="skipBtn" class="px-4 py-2 rounded-xl bg-ios-bg text-ios-text border border-ios-separator/30">Skip</button>
+            <!-- Next placed on the right; styled with ios-blue -->
+            <button id="nextBtn" class="px-4 py-2 rounded-xl bg-ios-blue text-white">Next</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 ios-blur border-t border-ios-separator/30 px-2 sm:px-6 py-2 flex justify-around items-center z-40 themed-card">
+        <button onclick="window.location.href='space.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1 sm:px-2">
+            <i class="fas fa-home text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+            <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Home</span>
+        </button>
+        <button onclick="window.location.href='calendar.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1 sm:px-2">
+            <i class="fas fa-calendar text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+            <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Calendar</span>
+        </button>
+        <button onclick="window.location.href='journey.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1 sm:px-2">
+            <i class="fas fa-heart text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+            <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Journey</span>
+        </button>
+        <button onclick="window.location.href='chat.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1 sm:px-2">
+            <i class="fas fa-comments text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+            <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Chat</span>
+        </button>
+        <button onclick="openSettings()" class="nav-item flex flex-col items-center gap-1 py-1 px-1 sm:px-2">
+            <i class="fas fa-bars text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+            <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">More</span>
+        </button>
+    </div>
+
+    <script>
+        // Helper functions
+        function loadUser(){ 
+            try{ return JSON.parse(localStorage.getItem('loveloggy_user')||'null'); }
+            catch(e){return null} 
+        }
+
+        const setPreview = (dataUrl)=>{
+            document.getElementById('photoPreview').innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
+            // keep for form-level usage
+            window._loveloggy_profile_pic = dataUrl;
+            // persist immediately: write partnerPhoto onto loveloggy_user so other screens can read it
+            try{
+                const cur = loadUser() || {};
+                cur.partnerPhoto = dataUrl;
+                localStorage.setItem('loveloggy_user', JSON.stringify(cur));
+                // show saved indicator briefly
+                const msg = document.getElementById('photoSavedMsg');
+                if(msg){ msg.classList.remove('hidden'); setTimeout(()=> msg.classList.add('hidden'), 1800); }
+            }catch(e){ console.warn('Could not save partner photo', e); }
+        };
+
+        // Upload photo handlers
+        document.getElementById('uploadBtn').addEventListener('click', ()=> document.getElementById('photoInput').click());
+        document.getElementById('photoInput').addEventListener('change', (e)=>{
+            const file = e.target.files[0]; if(!file) return;
+            const reader = new FileReader(); 
+            reader.onload = (ev)=> setPreview(ev.target.result); 
+            reader.readAsDataURL(file);
+        });
+
+        // Partner name inline edit and autosave
+        const partnerInput = document.getElementById('partnerName');
+        const partnerEditBtn = document.getElementById('partnerNameEdit');
+        const partnerSavedMsg = document.getElementById('partnerSavedMsg');
+
+        if(partnerEditBtn){
+            partnerEditBtn.addEventListener('click', ()=>{
+                partnerInput.focus(); partnerInput.select();
+            });
+        }
+
+        function savePartnerName(){
+            const val = partnerInput.value.trim();
+            try{
+                const cur = loadUser() || {};
+                cur.partnerName = val;
+                localStorage.setItem('loveloggy_user', JSON.stringify(cur));
+                // show saved indicator
+                if(partnerSavedMsg){ 
+                    partnerSavedMsg.classList.remove('hidden'); 
+                    setTimeout(()=> partnerSavedMsg.classList.add('hidden'), 1400); 
+                }
+            }catch(e){ console.warn('Could not save partner name', e); }
+        }
+
+        partnerInput.addEventListener('blur', savePartnerName);
+        partnerInput.addEventListener('keydown', (e)=>{ 
+            if(e.key==='Enter'){ e.preventDefault(); partnerInput.blur(); } 
+        });
+
+        // Populate fields if user data exists
+        const user = loadUser();
+        if(user){
+            if(user.partnerName) document.getElementById('partnerName').value = user.partnerName;
+            if(user.startDate) document.getElementById('anniversary').value = user.startDate;
+            if(user.relationshipStatus) document.getElementById('relationStatus').value = user.relationshipStatus;
+            if(user.partnerPhoto) setPreview(user.partnerPhoto);
+        }
+
+        
+
+        // Next button: save current fields (no confirmation) and go to space
+        document.getElementById('nextBtn').addEventListener('click', ()=>{
+            const partnerName = document.getElementById('partnerName').value.trim();
+            const anniversary = document.getElementById('anniversary').value;
+            const relationshipStatus = document.getElementById('relationStatus').value;
+            const partnerPhoto = window._loveloggy_profile_pic || (user && user.partnerPhoto) || null;
+
+            const base = user || {};
+            if(partnerName) base.partnerName = partnerName;
+            if(anniversary) base.startDate = anniversary;
+            if(relationshipStatus) base.relationshipStatus = relationshipStatus;
+            if(partnerPhoto) base.partnerPhoto = partnerPhoto;
+
+                localStorage.setItem('loveloggy_user', JSON.stringify(base));
+            window.location.href = 'space.html';
+        });
+
+        // Skip button
+        document.getElementById('skipBtn').addEventListener('click', ()=>{ 
+            window.location.href = 'space.html'; 
+        });
+    </script>
+</body>
+</html>

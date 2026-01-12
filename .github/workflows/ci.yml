@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  server-ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run lint
+        run: npm run lint
+      - name: Run tests
+        run: npm test
+
+  repo-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Basic repo health
+        run: |
+          echo "Files in repo:" && ls -la
+          echo "Node version:" && node --version || true

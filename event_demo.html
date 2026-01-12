@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>EventCard Demo — LoveLoggy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* small helper for multiline truncation if `line-clamp` isn't available */
+      .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen p-6">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold mb-4">EventCard React Demo</h1>
+
+      <div id="root" />
+    </div>
+
+    <!-- React + ReactDOM + Babel (for quick demo only) -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js"></script>
+
+    <script type="text/babel">
+      const { useState } = React
+
+      const moodMap = {
+        love: { emoji: '❤️', className: 'bg-pink-50 text-pink-700' },
+        neutral: { emoji: '😐', className: 'bg-gray-50 text-gray-700' },
+        sad: { emoji: '😢', className: 'bg-blue-50 text-blue-700' },
+        angry: { emoji: '😡', className: 'bg-red-50 text-red-700' },
+      }
+
+      function formatDate(d) {
+        const date = typeof d === 'string' ? new Date(d) : d
+        if (Number.isNaN(date.getTime())) return ''
+        return date.toLocaleString()
+      }
+
+      function EventCard({ title, date, mood = 'neutral', description, onClick, className = '' }) {
+        const moodInfo = moodMap[mood] || moodMap.neutral
+        return (
+          <article
+            onClick={onClick}
+            className={`max-w-md w-full rounded-lg border border-gray-100 shadow-sm overflow-hidden ${className}`}
+            style={{cursor: onClick ? 'pointer' : 'default'}}
+          >
+            <div className="p-4 flex items-start gap-4">
+              <div className={`flex-shrink-0 h-12 w-12 rounded-full flex items-center justify-center ${moodInfo.className}`}>
+                <span className="text-xl">{moodInfo.emoji}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-semibold text-gray-900 truncate">{title}</h3>
+                  <time className="text-xs text-gray-500 ml-3">{formatDate(date)}</time>
+                </div>
+                <p className="text-sm text-gray-600 line-clamp-3">{description}</p>
+              </div>
+            </div>
+          </article>
+        )
+      }
+
+      EventCard.propTypes = {
+        title: PropTypes.string.isRequired,
+        date: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
+        mood: PropTypes.oneOf(['love','neutral','sad','angry']),
+        description: PropTypes.string,
+        onClick: PropTypes.func,
+        className: PropTypes.string,
+      }
+
+      function App(){
+        const [selected, setSelected] = useState(null)
+
+        const examples = [
+          { id:1, title: 'First date picnic', date: new Date(), mood: 'love', description: 'We had a lovely picnic at the riverside and talked for hours. The sunset was incredible and we took many photos.' },
+          { id:2, title: 'Big disagreement', date: new Date(Date.now()-1000*60*60*24*10), mood: 'angry', description: 'We had a heated discussion about budgets. It was rough but we later reconciled.' },
+          { id:3, title: 'Bought matching mugs', date: new Date(Date.now()-1000*60*60*24*30), mood: 'neutral', description: 'A small, cozy memory — matching mugs for our morning coffee routine.' },
+        ]
+
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {examples.map(evt => (
+                <EventCard
+                  key={evt.id}
+                  title={evt.title}
+                  date={evt.date}
+                  mood={evt.mood}
+                  description={evt.description}
+                  onClick={() => setSelected(evt)}
+                />
+              ))}
+            </div>
+
+            {selected && (
+              <div className="mt-4 p-4 rounded bg-white border">
+                <h2 className="font-semibold">Selected event: {selected.title}</h2>
+                <p className="text-sm text-gray-600">{selected.description}</p>
+                <button className="mt-2 px-3 py-1 bg-indigo-600 text-white rounded" onClick={() => setSelected(null)}>Close</button>
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+    </script>
+  </body>
+</html>

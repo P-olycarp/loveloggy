@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoveLoggy | Our Journey</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'DM Sans', 'sans-serif']
+                    },
+                    colors: {
+                        sand: {
+                            50: '#FAF9F6',
+                            100: '#F5F2EB',
+                            200: '#EBE7E0',
+                            300: '#A69C8E',
+                            400: '#A69C8E',
+                            500: '#8B7E74',
+                            600: '#5D5752',
+                        },
+                        clay: '#9E8C78',
+                        ios: {
+                            blue: '#007AFF',
+                            bg: '#EBE7E0',
+                            card: '#FFFFFF',
+                            separator: '#C6C6C8',
+                            text: '#000000',
+                            secondary: '#8E8E93',
+                            red: '#FF3B30',
+                            green: '#34C759'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 8px 30px -6px rgba(139, 126, 116, 0.12)',
+                        'float': '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.01)',
+                    },
+                    rotate: {
+                        '1': '1.5deg',
+                        '-1': '-1.5deg',
+                        '2': '2.5deg',
+                        '-2': '-2.5deg',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .animate-enter { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .ios-blur {
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+        @media (max-width: 380px) {
+            .nav-item span { font-size: 9px !important; }
+            .nav-item i { font-size: 18px !important; }
+        }
+    </style>
+    <script src="src/auth.js"></script>
+    <script src="src/settings.js"></script>
+</head>
+<body class="bg-ios-bg text-ios-text antialiased min-h-screen flex justify-center">
+
+    <div class="w-full max-w-md bg-ios-bg min-h-screen relative flex flex-col">
+
+        <header class="sticky top-0 z-40 bg-ios-bg/90 ios-blur px-6 pt-12 pb-2 transition-all border-b border-ios-separator/30">
+            <div class="flex justify-between items-end mb-4">
+                <div>
+                    <h1 class="text-xl font-bold text-ios-text tracking-tight">Our Journey</h1>
+                    <p id="daysTogether" class="text-[10px] text-ios-blue font-medium uppercase tracking-wider mt-1">Day —</p>
+                </div>
+                
+                <div class="flex -space-x-4 items-center">
+                    <div id="avatarA" class="w-11 h-11 rounded-full border-[3px] border-ios-bg overflow-hidden shadow-sm bg-ios-separator"></div>
+                    <div id="avatarB" class="w-11 h-11 rounded-full border-[3px] border-ios-bg overflow-hidden shadow-sm z-10 bg-ios-separator"></div>
+                </div>
+            </div>
+
+            <div class="flex space-x-3 overflow-x-auto no-scrollbar pb-2">
+                <button id="tabTimeline" class="bg-ios-blue text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-md whitespace-nowrap">Timeline</button>
+                <button id="tabGallery" class="bg-ios-card text-ios-secondary px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:bg-white transition-colors border border-ios-separator/30">Gallery 📸</button>
+                <button id="tabQuotes" class="bg-ios-card text-ios-secondary px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:bg-white transition-colors border border-ios-separator/30">Quotes 💬</button>
+                <button id="tabPlaces" class="bg-ios-card text-ios-secondary px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:bg-white transition-colors border border-ios-separator/30">Places 📍</button>
+            </div>
+        </header>
+
+        <!-- Emotional Insights (appears when patterns detected) -->
+        <div id="emotionalInsights" class="hidden px-4 pt-4">
+            <!-- Weekly trend -->
+            <div id="weeklyTrend" class="hidden bg-ios-card rounded-2xl p-4 mb-3 border border-ios-separator/30 shadow-sm">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xl">📊</span>
+                    <h3 class="text-sm font-bold text-ios-text">This Week's Vibe</h3>
+                </div>
+                <div id="weeklyMoodChart" class="flex items-end gap-1 h-12 mb-2">
+                    <!-- Mood bars will be injected here -->
+                </div>
+                <p id="weeklyTrendText" class="text-xs text-ios-secondary"></p>
+            </div>
+
+            <!-- Reflection prompt (only shows for negative streaks) -->
+            <div id="reflectionPrompt" class="hidden bg-ios-card rounded-2xl p-4 mb-3 border border-ios-blue/30 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl">💭</span>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-bold text-ios-blue mb-1">Gentle Check-in</h3>
+                        <p class="text-xs text-ios-blue leading-relaxed mb-2">We've noticed some challenging moments lately. Remember, every relationship has ups and downs.</p>
+                        <p class="text-xs text-ios-secondary italic">What's one small thing that brought you joy together recently?</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main id="main" class="flex-1 px-4 pb-28 pt-2 space-y-8 overflow-y-auto no-scrollbar">
+            <!-- Timeline entries will be injected here -->
+        </main>
+
+        <!-- Bottom Navigation -->
+        <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 ios-blur border-t border-ios-separator/30 px-2 sm:px-4 py-2 flex justify-around items-center z-40 themed-card">
+            <button onclick="window.location.href='space.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1">
+                <i class="fas fa-home text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Home</span>
+            </button>
+            <button onclick="window.location.href='calendar.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1">
+                <i class="fas fa-calendar text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Calendar</span>
+            </button>
+            <button id="btnAdd" class="nav-item flex flex-col items-center gap-1 py-1 -mt-4 px-1">
+                <div class="bg-ios-blue text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg themed-accent-bg">
+                    <i class="fas fa-plus text-lg sm:text-xl"></i>
+                </div>
+            </button>
+            <button onclick="window.location.href='chat.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1">
+                <i class="fas fa-comments text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Chat</span>
+            </button>
+            <button onclick="openSettings()" class="nav-item flex flex-col items-center gap-1 py-1 px-1">
+                <i class="fas fa-bars text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">More</span>
+            </button>
+        </div>
+
+        <!-- Add entry modal (hidden) -->
+        <div id="modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-60">
+            <div class="bg-ios-card rounded-2xl p-5 w-11/12 max-w-md shadow-xl border border-ios-separator/30">
+                <h3 class="font-bold text-ios-text mb-3">Add entry</h3>
+                <div class="space-y-2">
+                    <input id="entryTitle" placeholder="Title" class="w-full bg-ios-bg rounded-xl p-3 outline-none border border-ios-separator/30 text-ios-text">
+                    <input id="entryDate" type="date" class="w-full bg-ios-bg rounded-xl p-3 outline-none border border-ios-separator/30 text-ios-text">
+                    <textarea id="entryText" rows="3" placeholder="Write something..." class="w-full bg-ios-bg rounded-xl p-3 outline-none border border-ios-separator/30 text-ios-text"></textarea>
+                    <input id="entryImage" placeholder="Image URL (optional)" class="w-full bg-ios-bg rounded-xl p-3 outline-none border border-ios-separator/30 text-ios-text">
+                    
+                    <!-- Mood Selection -->
+                    <div>
+                        <label class="text-xs text-ios-secondary mb-1 block">How are you feeling?</label>
+                        <div class="flex gap-2 justify-around bg-ios-bg rounded-xl p-3 border border-ios-separator/30">
+                            <button type="button" class="mood-btn text-3xl opacity-40 hover:opacity-100 transition-opacity" data-mood="love" onclick="selectMood('love')">❤️</button>
+                            <button type="button" class="mood-btn text-3xl opacity-40 hover:opacity-100 transition-opacity" data-mood="happy" onclick="selectMood('happy')">😊</button>
+                            <button type="button" class="mood-btn text-3xl opacity-40 hover:opacity-100 transition-opacity" data-mood="neutral" onclick="selectMood('neutral')">😐</button>
+                            <button type="button" class="mood-btn text-3xl opacity-40 hover:opacity-100 transition-opacity" data-mood="sad" onclick="selectMood('sad')">😔</button>
+                            <button type="button" class="mood-btn text-3xl opacity-40 hover:opacity-100 transition-opacity" data-mood="frustrated" onclick="selectMood('frustrated')">😡</button>
+                        </div>
+                    </div>
+
+                    <!-- Energy Level -->
+                    <div>
+                        <label class="text-xs text-ios-secondary mb-1 block">Energy level</label>
+                        <div class="flex gap-2 bg-ios-bg rounded-xl p-3 border border-ios-separator/30">
+                            <button type="button" class="energy-btn flex-1 py-2 rounded-lg bg-ios-card text-sm font-medium text-ios-secondary hover:bg-ios-blue hover:text-white transition" data-energy="1" onclick="selectEnergy(1)">1</button>
+                            <button type="button" class="energy-btn flex-1 py-2 rounded-lg bg-ios-card text-sm font-medium text-ios-secondary hover:bg-ios-blue hover:text-white transition" data-energy="2" onclick="selectEnergy(2)">2</button>
+                            <button type="button" class="energy-btn flex-1 py-2 rounded-lg bg-ios-card text-sm font-medium text-ios-secondary hover:bg-ios-blue hover:text-white transition" data-energy="3" onclick="selectEnergy(3)">3</button>
+                            <button type="button" class="energy-btn flex-1 py-2 rounded-lg bg-ios-card text-sm font-medium text-ios-secondary hover:bg-ios-blue hover:text-white transition" data-energy="4" onclick="selectEnergy(4)">4</button>
+                            <button type="button" class="energy-btn flex-1 py-2 rounded-lg bg-ios-card text-sm font-medium text-ios-secondary hover:bg-ios-blue hover:text-white transition" data-energy="5" onclick="selectEnergy(5)">5</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button id="cancelAdd" class="px-4 py-2 rounded-xl bg-ios-bg text-ios-text border border-ios-separator/30">Cancel</button>
+                    <button id="saveAdd" class="px-4 py-2 rounded-xl bg-ios-blue text-white">Save</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Utilities
+        function daysBetween(start){
+            try{
+                const msPerDay = 24*60*60*1000;
+                const startD = new Date(start);
+                const now = new Date();
+                const diff = Math.floor((now - startD)/msPerDay);
+                return diff >= 0 ? diff : 0;
+            } catch(e){ return 0; }
+        }
+
+        function loadUser(){
+            const raw = localStorage.getItem('loveloggy_user');
+            if(!raw) return null;
+            try { return JSON.parse(raw); } catch(e){ return null; }
+        }
+
+        function loadEntries(){
+            const raw = localStorage.getItem('loveloggy_entries');
+            if(!raw) return [];
+            try { return JSON.parse(raw); } catch(e){ return []; }
+        }
+
+        function saveEntries(arr){
+            localStorage.setItem('loveloggy_entries', JSON.stringify(arr));
+        }
+
+        function formatDate(d){
+            if(!d) return '';
+            const dt = new Date(d);
+            return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+
+        // Emotional analysis functions
+        function getMoodScore(mood) {
+            const scores = { love: 5, happy: 4, neutral: 3, sad: 2, frustrated: 1 };
+            return scores[mood] || 3;
+        }
+
+        function getEntriesFromLastWeek(entries) {
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            return entries.filter(e => e.date && new Date(e.date) >= oneWeekAgo);
+        }
+
+        function detectNegativeStreak(entries) {
+            // Check last 3-5 entries for consecutive low moods
+            const recent = entries.slice(0, 5);
+            const withMood = recent.filter(e => e.mood);
+            if (withMood.length < 3) return false;
+
+            const recentMoods = withMood.slice(0, 3);
+            const negativeCount = recentMoods.filter(e => e.mood === 'sad' || e.mood === 'frustrated').length;
+            return negativeCount >= 2;
+        }
+
+        function analyzeEmotionalTrends(entries) {
+            const insights = document.getElementById('emotionalInsights');
+            const weeklyTrendDiv = document.getElementById('weeklyTrend');
+            const weeklyMoodChart = document.getElementById('weeklyMoodChart');
+            const weeklyTrendText = document.getElementById('weeklyTrendText');
+            const reflectionPrompt = document.getElementById('reflectionPrompt');
+
+            const weekEntries = getEntriesFromLastWeek(entries);
+            const hasNegativeStreak = detectNegativeStreak(entries);
+
+            // Only show insights if there's data
+            if (weekEntries.length === 0) {
+                insights.classList.add('hidden');
+                return;
+            }
+
+            insights.classList.remove('hidden');
+
+            // Show weekly trend if there are mood entries
+            const withMood = weekEntries.filter(e => e.mood);
+            if (withMood.length > 0) {
+                weeklyTrendDiv.classList.remove('hidden');
+
+                // Count moods
+                const moodCounts = { love: 0, happy: 0, neutral: 0, sad: 0, frustrated: 0 };
+                withMood.forEach(e => moodCounts[e.mood]++);
+
+                // Calculate average
+                const avgScore = withMood.reduce((sum, e) => sum + getMoodScore(e.mood), 0) / withMood.length;
+                
+                // Create bar chart
+                const maxCount = Math.max(...Object.values(moodCounts), 1);
+                const moodEmojis = { love: '❤️', happy: '😊', neutral: '😐', sad: '😔', frustrated: '😡' };
+                const moodColors = { 
+                    love: 'bg-red-200', 
+                    happy: 'bg-yellow-200', 
+                    neutral: 'bg-gray-200', 
+                    sad: 'bg-blue-200', 
+                    frustrated: 'bg-purple-200' 
+                };
+                
+                weeklyMoodChart.innerHTML = Object.keys(moodCounts).map(mood => {
+                    const height = (moodCounts[mood] / maxCount) * 100;
+                    return `
+                        <div class="flex-1 flex flex-col items-center justify-end gap-1">
+                            <div class="${moodColors[mood]} rounded-t transition-all" style="width: 100%; height: ${height}%"></div>
+                            <span class="text-xs">${moodEmojis[mood]}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                // Trend text (non-judgmental)
+                if (avgScore >= 4) {
+                    weeklyTrendText.textContent = '✨ Lots of positive moments this week!';
+                } else if (avgScore >= 3) {
+                    weeklyTrendText.textContent = '🌤️ A balanced week with mixed feelings.';
+                } else {
+                    weeklyTrendText.textContent = '🌧️ Some tough moments this week.';
+                }
+            } else {
+                weeklyTrendDiv.classList.add('hidden');
+            }
+
+            // Show gentle reflection prompt for negative streaks
+            if (hasNegativeStreak) {
+                reflectionPrompt.classList.remove('hidden');
+            } else {
+                reflectionPrompt.classList.add('hidden');
+            }
+        }
+
+        // Render
+        function render(){
+            const main = document.getElementById('main');
+            main.innerHTML = '';
+
+            const entries = loadEntries();
+            if(entries.length === 0){
+                // no pre-seeded entries — encourage the couple to add their first moment
+                main.innerHTML = '<p class="text-xs text-sand-400 text-center py-8">No entries yet — tap + to add your first memory.</p>';
+                // Hide insights when empty
+                document.getElementById('emotionalInsights').classList.add('hidden');
+                return;
+            }
+
+            entries.sort((a,b)=> new Date(b.date) - new Date(a.date));
+
+            // Analyze emotional trends
+            analyzeEmotionalTrends(entries);
+
+            entries.forEach((e, idx) => {
+                const delay = 0.1 + (idx*0.05);
+                const article = document.createElement('article');
+                article.className = 'animate-enter relative px-2';
+                article.style.animationDelay = delay + 's';
+
+                const moodEmoji = e.mood ? {
+                    love: '❤️',
+                    happy: '😊',
+                    neutral: '😐',
+                    sad: '😔',
+                    frustrated: '😡'
+                }[e.mood] : null;
+
+                const energyDots = e.energy ? '⚡'.repeat(e.energy) : null;
+
+                const moodEnergyHTML = (moodEmoji || energyDots) ? `
+                    <div class="flex items-center gap-2 mt-2">
+                        ${moodEmoji ? `<span class="text-lg">${moodEmoji}</span>` : ''}
+                        ${energyDots ? `<span class="text-xs text-sand-400">${energyDots}</span>` : ''}
+                    </div>
+                ` : '';
+
+                if(e.image){
+                    article.innerHTML = `
+                    <div class="transform -rotate-1 group hover:rotate-0 transition-all duration-500">
+                        <div class="bg-sand-50 p-2 rounded-[32px] shadow-soft">
+                            <div class="aspect-[4/5] w-full rounded-[24px] overflow-hidden relative">
+                                <img src="${e.image}" class="w-full h-full object-cover">
+                                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
+                                    <span class="text-xs font-bold text-white">${formatDate(e.date)}</span>
+                                </div>
+                            </div>
+                            <div class="px-4 py-4">
+                                <h3 class="font-bold text-sand-600 text-lg">${e.title}</h3>
+                                <p class="text-sand-400 text-sm mt-1">${e.text}</p>
+                                ${moodEnergyHTML}
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                } else {
+                    article.innerHTML = `
+                    <div class="animate-enter flex justify-end">
+                        <div class="max-w-[85%] transform rotate-1 hover:rotate-0 transition-transform">
+                            <div class="bg-white p-6 rounded-3xl rounded-tr-sm shadow-soft relative border border-sand-100">
+                                <div class="absolute -top-3 -left-2 bg-clay text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 11.5523 13.5693 12 13.017 12H12.017V5H22.017V15C22.017 18.3137 19.3307 21 16.017 21H14.017ZM5.0166 21L5.0166 18C5.0166 16.8954 5.91203 16 7.0166 16H10.0166C10.5689 16 11.0166 15.5523 11.0166 15V9C11.0166 8.44772 10.5689 8 10.0166 8H6.0166C5.46432 8 5.0166 8.44772 5.0166 9V11C5.0166 11.5523 4.56889 12 4.0166 12H3.0166V5H13.0166V15C13.0166 18.3137 10.3303 21 7.0166 21H5.0166Z"/></svg>
+                                </div>
+                                <p class="text-sand-600 text-lg font-medium leading-relaxed italic">${e.text}</p>
+                                <div class="mt-4 flex items-center justify-between">
+                                    <span class="text-xs text-sand-400 font-bold tracking-wide uppercase">${formatDate(e.date)}</span>
+                                </div>
+                                ${moodEnergyHTML}
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }
+
+                main.appendChild(article);
+            });
+        }
+
+        // Modal handlers
+        let selectedMood = null;
+        let selectedEnergy = null;
+
+        function selectMood(mood) {
+            selectedMood = mood;
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                if (btn.dataset.mood === mood) {
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1.2)';
+                } else {
+                    btn.style.opacity = '0.4';
+                    btn.style.transform = 'scale(1)';
+                }
+            });
+        }
+
+        function selectEnergy(level) {
+            selectedEnergy = level;
+            document.querySelectorAll('.energy-btn').forEach(btn => {
+                const btnLevel = parseInt(btn.dataset.energy);
+                if (btnLevel === level) {
+                    btn.classList.add('bg-sand-600', 'text-white');
+                    btn.classList.remove('bg-white', 'text-sand-400');
+                } else {
+                    btn.classList.remove('bg-sand-600', 'text-white');
+                    btn.classList.add('bg-white', 'text-sand-400');
+                }
+            });
+        }
+
+        function resetModalInputs() {
+            document.getElementById('entryTitle').value = '';
+            document.getElementById('entryDate').value = '';
+            document.getElementById('entryText').value = '';
+            document.getElementById('entryImage').value = '';
+            selectedMood = null;
+            selectedEnergy = null;
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.style.opacity = '0.4';
+                btn.style.transform = 'scale(1)';
+            });
+            document.querySelectorAll('.energy-btn').forEach(btn => {
+                btn.classList.remove('bg-sand-600', 'text-white');
+                btn.classList.add('bg-white', 'text-sand-400');
+            });
+        }
+
+        function openModal(){ 
+            document.getElementById('modal').classList.remove('hidden'); 
+            document.getElementById('modal').classList.add('flex'); 
+        }
+        function closeModal(){ 
+            document.getElementById('modal').classList.add('hidden'); 
+            document.getElementById('modal').classList.remove('flex'); 
+            resetModalInputs();
+        }
+
+        document.addEventListener('DOMContentLoaded', ()=>{
+            const user = loadUser();
+            const daysEl = document.getElementById('daysTogether');
+            const avatarA = document.getElementById('avatarA');
+            const avatarB = document.getElementById('avatarB');
+
+            if(!user){
+                // No logged-in user: require sign-in to view this private journal
+                window.location.href = 'index.html';
+                return;
+            } else {
+                const days = daysBetween(user.startDate);
+                daysEl.textContent = `${user.name || 'You'} & ${user.partnerName || 'Partner'} — Together ${days} day${days===1?'':'s'}`;
+                if(user.profilePic){ avatarA.innerHTML = `<img src="${user.profilePic}" class="w-full h-full object-cover">`; }
+                if(user.partnerPhoto){ avatarB.innerHTML = `<img src="${user.partnerPhoto}" class="w-full h-full object-cover">`; }
+            }
+
+            // Wire buttons
+            document.getElementById('btnAdd').addEventListener('click', openModal);
+            document.getElementById('cancelAdd').addEventListener('click', ()=>{ closeModal(); });
+            document.getElementById('saveAdd').addEventListener('click', ()=>{
+                // collect values exactly as provided by the user; do not inject defaults
+                const title = document.getElementById('entryTitle').value.trim();
+                const date = document.getElementById('entryDate').value;
+                const text = document.getElementById('entryText').value.trim();
+                const image = document.getElementById('entryImage').value.trim();
+
+                const entries = loadEntries();
+                entries.push({ 
+                    id: Date.now(), 
+                    title: title || '', 
+                    date: date || '', 
+                    text: text || '', 
+                    image: image || '',
+                    mood: selectedMood || null,
+                    energy: selectedEnergy || null
+                });
+                saveEntries(entries);
+                closeModal();
+                render();
+            });
+
+            // Logout: go back to index.html
+            document.querySelector('header').addEventListener('dblclick', ()=>{ window.location.href = 'index.html'; });
+
+            render();
+        });
+    </script>
+</body>
+</html>

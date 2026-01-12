@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery • LoveLoggy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'DM Sans', 'sans-serif']
+                    },
+                    colors: {
+                        sand: {
+                            50: '#F7F5F2',
+                            100: '#EBE7E0',
+                            300: '#A69C8E',
+                            500: '#8B7E74',
+                            600: '#5D5752'
+                        },
+                        clay: '#9E8C78',
+                        ios: {
+                            blue: '#007AFF',
+                            bg: '#EBE7E0',
+                            card: '#FFFFFF',
+                            separator: '#C6C6C8',
+                            text: '#000000',
+                            secondary: '#8E8E93',
+                            red: '#FF3B30',
+                            green: '#34C759',
+                            orange: '#FF9500',
+                            pink: '#FF2D55'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .ios-blur {
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+        .folder-icon {
+            background: linear-gradient(180deg, #5AC8FA 0%, #007AFF 100%);
+        }
+        .photo-thumbnail {
+            transition: transform 0.15s ease;
+        }
+        .photo-thumbnail:active {
+            transform: scale(0.95);
+        }
+        .list-row:active {
+            background-color: rgba(0,0,0,0.05);
+        }
+        .selection-circle {
+            transition: all 0.2s ease;
+        }
+        .tab-active {
+            color: #007AFF;
+        }
+        .tab-active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #007AFF;
+            border-radius: 1px;
+        }
+        .context-menu {
+            animation: slideUp 0.2s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .folder-card:active {
+            transform: scale(0.97);
+            transition: transform 0.1s ease;
+        }
+        @media (max-width: 380px) {
+            .nav-item span { font-size: 9px !important; }
+            .nav-item i { font-size: 18px !important; }
+        }
+    </style>
+    <script src="src/auth.js"></script>
+    <script src="src/settings.js"></script>
+</head>
+<body class="bg-ios-bg font-sans">
+    <div class="max-w-md mx-auto bg-ios-bg min-h-screen relative">
+        <!-- iOS-Style Header -->
+        <header class="bg-ios-bg/80 ios-blur sticky top-0 z-40">
+            <!-- Navigation Bar -->
+            <div class="px-4 pt-3 pb-1 flex items-center justify-between">
+                <button onclick="window.location.href='space.html'" class="text-ios-blue text-base flex items-center gap-1 min-w-[70px]">
+                    <i class="fas fa-chevron-left text-sm"></i>
+                    <span>Back</span>
+                </button>
+                <button id="selectBtn" class="text-ios-blue text-base font-medium min-w-[70px] text-right">Select</button>
+            </div>
+            
+            <!-- Large Title -->
+            <div class="px-4 pt-1 pb-2">
+                <h1 class="text-[34px] font-bold text-ios-text tracking-tight">Gallery</h1>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="px-4 pb-3">
+                <div class="bg-white/80 rounded-xl px-3 py-2 flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-search text-ios-secondary text-sm"></i>
+                    <input type="text" id="searchInput" placeholder="Search" class="bg-transparent flex-1 text-base outline-none text-ios-text placeholder-ios-secondary">
+                    <button id="clearSearch" class="hidden w-5 h-5 bg-ios-secondary/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-times text-white text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tabs: Recents / Browse -->
+        <div class="px-4 py-2 flex gap-6 border-b border-ios-separator/30">
+            <button id="tabRecents" class="relative pb-2 text-sm font-semibold text-ios-secondary" onclick="switchTab('recents')">Recents</button>
+            <button id="tabBrowse" class="relative pb-2 text-sm font-semibold tab-active" onclick="switchTab('browse')">Browse</button>
+        </div>
+
+        <!-- Browse View -->
+        <div id="browseView">
+            <!-- Locations Section -->
+            <section class="mt-4 px-4">
+                <h2 class="text-xs font-semibold text-ios-secondary uppercase tracking-wide mb-2 px-1">Locations</h2>
+                <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+                    <div class="flex items-center px-4 py-3 border-b border-ios-separator/30 list-row cursor-pointer" onclick="openFolder('all')">
+                        <div class="w-8 h-8 folder-icon rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-photo-film text-white text-sm"></i>
+                        </div>
+                        <span class="flex-1 text-base text-ios-text">All Photos</span>
+                        <span id="allCount" class="text-ios-secondary text-sm mr-2">0</span>
+                        <i class="fas fa-chevron-right text-ios-separator text-xs"></i>
+                    </div>
+                    <div class="flex items-center px-4 py-3 border-b border-ios-separator/30 list-row cursor-pointer" onclick="openFolder('moments')">
+                        <div class="w-8 h-8 bg-gradient-to-b from-pink-400 to-ios-pink rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-heart text-white text-sm"></i>
+                        </div>
+                        <span class="flex-1 text-base text-ios-text">Moments</span>
+                        <span id="momentsCount" class="text-ios-secondary text-sm mr-2">0</span>
+                        <i class="fas fa-chevron-right text-ios-separator text-xs"></i>
+                    </div>
+                    <div class="flex items-center px-4 py-3 border-b border-ios-separator/30 list-row cursor-pointer" onclick="openFolder('events')">
+                        <div class="w-8 h-8 bg-gradient-to-b from-orange-400 to-ios-orange rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-calendar text-white text-sm"></i>
+                        </div>
+                        <span class="flex-1 text-base text-ios-text">Events</span>
+                        <span id="eventsCount" class="text-ios-secondary text-sm mr-2">0</span>
+                        <i class="fas fa-chevron-right text-ios-separator text-xs"></i>
+                    </div>
+                    <div class="flex items-center px-4 py-3 list-row cursor-pointer" onclick="openFolder('uploads')">
+                        <div class="w-8 h-8 bg-gradient-to-b from-green-400 to-ios-green rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-cloud-arrow-up text-white text-sm"></i>
+                        </div>
+                        <span class="flex-1 text-base text-ios-text">Uploads</span>
+                        <span id="uploadsCount" class="text-ios-secondary text-sm mr-2">0</span>
+                        <i class="fas fa-chevron-right text-ios-separator text-xs"></i>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Favorites Section -->
+            <section class="mt-6 px-4">
+                <h2 class="text-xs font-semibold text-ios-secondary uppercase tracking-wide mb-2 px-1">Favorites</h2>
+                <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+                    <div class="flex items-center px-4 py-3 list-row cursor-pointer" onclick="openFolder('profile')">
+                        <div class="w-8 h-8 bg-gradient-to-b from-purple-400 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-user-couple text-white text-sm"></i>
+                        </div>
+                        <span class="flex-1 text-base text-ios-text">Profile Photos</span>
+                        <span id="profileCount" class="text-ios-secondary text-sm mr-2">0</span>
+                        <i class="fas fa-chevron-right text-ios-separator text-xs"></i>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="mt-6 px-4 pb-32">
+                <h2 class="text-xs font-semibold text-ios-secondary uppercase tracking-wide mb-2 px-1">Quick Actions</h2>
+                <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+                    <button id="takePhotoBrowse" class="w-full flex items-center px-4 py-3 border-b border-ios-separator/30 list-row">
+                        <div class="w-8 h-8 bg-ios-blue rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-camera text-white text-sm"></i>
+                        </div>
+                        <span class="flex-1 text-base text-ios-text text-left">Take Photo</span>
+                        <i class="fas fa-chevron-right text-ios-separator text-xs"></i>
+                    </button>
+                    <button id="uploadPhotoBrowse" class="w-full flex items-center px-4 py-3 list-row">
+                        <div class="w-8 h-8 bg-ios-green rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-images text-white text-sm"></i>
+                        </div>
+                        <span class="flex-1 text-base text-ios-text text-left">Upload from Library</span>
+                        <i class="fas fa-chevron-right text-ios-separator text-xs"></i>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Folder Detail View (hidden by default) -->
+        <div id="folderView" class="hidden">
+            <!-- Folder Header -->
+            <div class="px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <h2 id="folderTitle" class="text-xl font-bold text-ios-text">All Photos</h2>
+                    <span id="folderCount" class="text-sm text-ios-secondary">0 items</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="viewToggle" class="w-8 h-8 flex items-center justify-center text-ios-blue">
+                        <i class="fas fa-th text-lg" id="viewIcon"></i>
+                    </button>
+                    <button id="sortBtn" class="w-8 h-8 flex items-center justify-center text-ios-blue">
+                        <i class="fas fa-arrow-down-short-wide text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Photo Grid View -->
+            <div id="photoGrid" class="px-1 pb-32 grid grid-cols-3 gap-0.5">
+                <!-- Photos rendered here -->
+            </div>
+
+            <!-- Photo List View -->
+            <div id="photoList" class="hidden px-4 pb-32">
+                <div id="photoListContent" class="bg-white rounded-xl overflow-hidden shadow-sm">
+                    <!-- List items rendered here -->
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden px-4 py-16 text-center">
+                <div class="w-24 h-24 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <i class="fas fa-photo-film text-4xl text-ios-secondary/50"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-ios-text mb-1">No Photos</h3>
+                <p class="text-sm text-ios-secondary mb-6">This folder is empty</p>
+                <button id="emptyAddBtn" class="bg-ios-blue text-white px-6 py-3 rounded-xl font-semibold">
+                    <i class="fas fa-camera mr-2"></i>Take a Photo
+                </button>
+            </div>
+        </div>
+
+        <!-- Recents View -->
+        <div id="recentsView" class="hidden">
+            <div class="px-4 py-3">
+                <p class="text-sm text-ios-secondary mb-4">Recently added photos</p>
+            </div>
+            <div id="recentsGrid" class="px-1 pb-32 grid grid-cols-3 gap-0.5">
+                <!-- Recent photos rendered here -->
+            </div>
+            <div id="recentsEmpty" class="hidden px-4 py-16 text-center">
+                <div class="w-24 h-24 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <i class="fas fa-clock-rotate-left text-4xl text-ios-secondary/50"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-ios-text mb-1">No Recent Photos</h3>
+                <p class="text-sm text-ios-secondary">Photos you add will appear here</p>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-backdrop hidden fixed inset-0 bg-black/50 z-50" onclick="hideSettings()"></div>
+        <div id="settingsPanel" class="settings-panel fixed right-0 top-0 h-full w-80 max-w-[85vw] bg-ios-card shadow-2xl z-50 transform translate-x-full transition-transform duration-300 overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-ios-text">Settings</h2>
+                    <button onclick="hideSettings()" class="w-8 h-8 rounded-full bg-ios-bg flex items-center justify-center">
+                        <i class="fas fa-times text-ios-secondary"></i>
+                    </button>
+                </div>
+                
+                <!-- Theme Selection -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-ios-text mb-3">App Theme</h3>
+                    <div class="grid grid-cols-5 gap-2" id="themeGrid">
+                        <button onclick="setTheme('sand')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#EBE7E0] to-[#D4CFC4] border-2 border-transparent hover:scale-110 transition-transform" data-theme="sand" title="Sand"></button>
+                        <button onclick="setTheme('rose')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#FFE4E6] to-[#FECDD3] border-2 border-transparent hover:scale-110 transition-transform" data-theme="rose" title="Rose"></button>
+                        <button onclick="setTheme('ocean')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#CFFAFE] to-[#A5F3FC] border-2 border-transparent hover:scale-110 transition-transform" data-theme="ocean" title="Ocean"></button>
+                        <button onclick="setTheme('midnight')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#1E1B4B] to-[#312E81] border-2 border-transparent hover:scale-110 transition-transform" data-theme="midnight" title="Midnight"></button>
+                        <button onclick="setTheme('lavender')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#EDE9FE] to-[#DDD6FE] border-2 border-transparent hover:scale-110 transition-transform" data-theme="lavender" title="Lavender"></button>
+                    </div>
+                </div>
+                
+                <!-- Toggle Options -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-ios-bg rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-vibrate text-ios-blue"></i>
+                            <span class="text-sm text-ios-text">Haptic Feedback</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="hapticToggle" class="sr-only peer" onchange="toggleSetting('haptic')">
+                            <div class="w-11 h-6 bg-ios-separator rounded-full peer peer-checked:bg-ios-green transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-ios-bg rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-heart text-ios-red"></i>
+                            <span class="text-sm text-ios-text">Romantic Mode</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="romanticToggle" class="sr-only peer" onchange="toggleSetting('romantic')">
+                            <div class="w-11 h-6 bg-ios-separator rounded-full peer peer-checked:bg-ios-green transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-ios-bg rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-compress-alt text-ios-secondary"></i>
+                            <span class="text-sm text-ios-text">Compact Mode</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="compactToggle" class="sr-only peer" onchange="toggleSetting('compact')">
+                            <div class="w-11 h-6 bg-ios-separator rounded-full peer peer-checked:bg-ios-green transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-ios-bg rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-volume-up text-ios-blue"></i>
+                            <span class="text-sm text-ios-text">Sound Effects</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="soundToggle" class="sr-only peer" onchange="toggleSetting('sound')">
+                            <div class="w-11 h-6 bg-ios-separator rounded-full peer peer-checked:bg-ios-green transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Bubble Style -->
+                <div class="mt-6">
+                    <h3 class="text-sm font-semibold text-ios-text mb-3">Bubble Style</h3>
+                    <div class="flex gap-2">
+                        <button onclick="setBubbleStyle('rounded')" class="bubble-btn flex-1 py-2 px-3 rounded-xl bg-ios-bg text-xs text-ios-text border-2 border-transparent" data-style="rounded">Rounded</button>
+                        <button onclick="setBubbleStyle('square')" class="bubble-btn flex-1 py-2 px-3 rounded-lg bg-ios-bg text-xs text-ios-text border-2 border-transparent" data-style="square">Square</button>
+                        <button onclick="setBubbleStyle('sharp')" class="bubble-btn flex-1 py-2 px-3 rounded-none bg-ios-bg text-xs text-ios-text border-2 border-transparent" data-style="sharp">Sharp</button>
+                    </div>
+                </div>
+                
+                <!-- Love Quote -->
+                <div id="loveQuote" class="mt-6 p-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl hidden">
+                    <p class="text-sm text-ios-text italic text-center" id="quoteText"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 ios-blur border-t border-ios-separator/30 px-4 py-2 flex justify-around items-center z-40">
+            <a href="space.html" class="nav-item flex flex-col items-center gap-1 py-1 min-w-[50px]">
+                <i class="fas fa-home text-ios-secondary text-xl"></i>
+                <span class="text-[10px] text-ios-secondary">Home</span>
+            </a>
+            <a href="calendar.html" class="nav-item flex flex-col items-center gap-1 py-1 min-w-[50px]">
+                <i class="fas fa-calendar text-ios-secondary text-xl"></i>
+                <span class="text-[10px] text-ios-secondary">Calendar</span>
+            </a>
+            <a href="journey.html" class="nav-item flex flex-col items-center gap-1 py-1 min-w-[50px]">
+                <i class="fas fa-heart text-ios-secondary text-xl"></i>
+                <span class="text-[10px] text-ios-secondary">Journey</span>
+            </a>
+            <a href="chat.html" class="nav-item flex flex-col items-center gap-1 py-1 min-w-[50px]">
+                <i class="fas fa-comments text-ios-secondary text-xl"></i>
+                <span class="text-[10px] text-ios-secondary">Chat</span>
+            </a>
+            <button onclick="showSettings()" class="nav-item flex flex-col items-center gap-1 py-1 min-w-[50px]">
+                <i class="fas fa-bars text-ios-secondary text-xl"></i>
+                <span class="text-[10px] text-ios-secondary">More</span>
+            </button>
+        </div>
+
+        <!-- Selection Mode Toolbar -->
+        <div id="selectionToolbar" class="hidden fixed bottom-16 left-0 right-0 max-w-md mx-auto bg-white border-t border-ios-separator/30 px-4 py-3 flex justify-around items-center z-40">
+            <button id="shareSelected" class="flex flex-col items-center gap-1 text-ios-blue">
+                <i class="fas fa-share text-lg"></i>
+                <span class="text-xs">Share</span>
+            </button>
+            <button id="deleteSelected" class="flex flex-col items-center gap-1 text-ios-red">
+                <i class="fas fa-trash text-lg"></i>
+                <span class="text-xs">Delete</span>
+            </button>
+            <button id="cancelSelection" class="flex flex-col items-center gap-1 text-ios-secondary">
+                <i class="fas fa-xmark text-lg"></i>
+                <span class="text-xs">Cancel</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="hidden fixed inset-0 bg-black z-50">
+        <!-- Header -->
+        <div class="absolute top-0 left-0 right-0 bg-black/50 ios-blur px-4 py-3 flex items-center justify-between z-10">
+            <button id="closeLightbox" class="text-white text-base font-medium">Done</button>
+            <span id="lightboxCounter" class="text-white text-sm"></span>
+            <button id="lightboxMore" class="text-white">
+                <i class="fas fa-ellipsis text-lg"></i>
+            </button>
+        </div>
+        <!-- Image -->
+        <div class="absolute inset-0 flex items-center justify-center">
+            <img id="lightboxImg" src="" class="max-w-full max-h-full object-contain">
+        </div>
+        <!-- Footer -->
+        <div class="absolute bottom-0 left-0 right-0 bg-black/50 ios-blur px-4 py-4 flex justify-around z-10">
+            <button id="shareLightbox" class="text-white flex flex-col items-center gap-1">
+                <i class="fas fa-share text-lg"></i>
+                <span class="text-xs">Share</span>
+            </button>
+            <button id="favLightbox" class="text-white flex flex-col items-center gap-1">
+                <i class="far fa-heart text-lg"></i>
+                <span class="text-xs">Favorite</span>
+            </button>
+            <button id="deleteLightboxBtn" class="text-ios-red flex flex-col items-center gap-1">
+                <i class="fas fa-trash text-lg"></i>
+                <span class="text-xs">Delete</span>
+            </button>
+        </div>
+        <!-- Navigation Arrows -->
+        <button id="prevPhoto" class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <i class="fas fa-chevron-left text-white"></i>
+        </button>
+        <button id="nextPhoto" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <i class="fas fa-chevron-right text-white"></i>
+        </button>
+    </div>
+
+    <!-- Sort Menu -->
+    <div id="sortMenu" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black/30">
+        <div class="w-full max-w-md bg-white rounded-t-2xl context-menu">
+            <div class="p-4 border-b border-ios-separator/30">
+                <h3 class="text-center font-semibold text-ios-text">Sort By</h3>
+            </div>
+            <button onclick="sortPhotos('date')" class="w-full px-4 py-3 text-left text-ios-blue border-b border-ios-separator/30">
+                <i class="fas fa-calendar mr-3"></i>Date
+            </button>
+            <button onclick="sortPhotos('name')" class="w-full px-4 py-3 text-left text-ios-blue border-b border-ios-separator/30">
+                <i class="fas fa-font mr-3"></i>Name
+            </button>
+            <button onclick="sortPhotos('type')" class="w-full px-4 py-3 text-left text-ios-blue">
+                <i class="fas fa-tag mr-3"></i>Type
+            </button>
+            <div class="p-2">
+                <button onclick="closeSortMenu()" class="w-full py-3 bg-ios-bg rounded-xl text-ios-blue font-semibold">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Inputs -->
+    <input type="file" id="fileInput" accept="image/*" class="hidden">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+    
+    <script>
+        // Check login
+        const user = window.LoveLoggyAuth && LoveLoggyAuth.getCurrentUser ? LoveLoggyAuth.getCurrentUser() : JSON.parse(localStorage.getItem('loveloggy_user') || 'null');
+        if (!user) {
+            window.location.href = 'index.html';
+        }
+
+        // State
+        let currentFolder = 'all';
+        let currentView = 'grid';
+        let isSelectionMode = false;
+        let selectedPhotos = new Set();
+        let currentPhotoIndex = -1;
+        let currentPhotos = [];
+        let sortBy = 'date';
+
+        // Load photos from all sources
+        function loadAllPhotos() {
+            const photos = [];
+            
+            // Profile photos
+            if (user.profilePic) photos.push({ 
+                src: user.profilePic, 
+                type: 'profile', 
+                id: 'profile_self',
+                name: 'My Profile',
+                date: user.createdAt || new Date().toISOString()
+            });
+            if (user.partnerPhoto) photos.push({ 
+                src: user.partnerPhoto, 
+                type: 'profile',
+                id: 'profile_partner',
+                name: 'Partner',
+                date: user.createdAt || new Date().toISOString()
+            });
+
+            // Event photos
+            const events = JSON.parse(localStorage.getItem('loveloggy_events') || '[]');
+            events.forEach((e, i) => {
+                if (e.photo) photos.push({ 
+                    src: e.photo, 
+                    type: 'event',
+                    id: `event_${i}`,
+                    name: e.title || 'Event Photo',
+                    date: e.date || new Date().toISOString()
+                });
+            });
+
+            // Moment photos
+            const entries = JSON.parse(localStorage.getItem('loveloggy_entries') || '[]');
+            entries.forEach((e, i) => {
+                if (e.image) photos.push({ 
+                    src: e.image, 
+                    type: 'moment',
+                    id: `moment_${i}`,
+                    name: e.title || 'Moment',
+                    date: e.date || e.createdAt || new Date().toISOString()
+                });
+            });
+
+            // Gallery-specific photos
+            const gallery = JSON.parse(localStorage.getItem('loveloggy_gallery') || '[]');
+            gallery.forEach(g => photos.push({ 
+                src: g.src, 
+                type: 'upload', 
+                id: g.id,
+                name: `Photo ${g.id}`,
+                date: g.uploadedAt || new Date().toISOString()
+            }));
+
+            return photos;
+        }
+
+        function getPhotosByFolder(folder) {
+            const all = loadAllPhotos();
+            switch(folder) {
+                case 'all': return all;
+                case 'moments': return all.filter(p => p.type === 'moment');
+                case 'events': return all.filter(p => p.type === 'event');
+                case 'uploads': return all.filter(p => p.type === 'upload');
+                case 'profile': return all.filter(p => p.type === 'profile');
+                case 'recents': return all.slice(-20).reverse();
+                default: return all;
+            }
+        }
+
+        function saveGallery(gallery) {
+                    localStorage.setItem('loveloggy_gallery', JSON.stringify(gallery));
+        }
+
+        // Update counts
+        function updateCounts() {
+            const all = loadAllPhotos();
+            document.getElementById('allCount').textContent = all.length;
+            document.getElementById('momentsCount').textContent = all.filter(p => p.type === 'moment').length;
+            document.getElementById('eventsCount').textContent = all.filter(p => p.type === 'event').length;
+            document.getElementById('uploadsCount').textContent = all.filter(p => p.type === 'upload').length;
+            document.getElementById('profileCount').textContent = all.filter(p => p.type === 'profile').length;
+        }
+
+        // Switch tabs
+        function switchTab(tab) {
+            const tabRecents = document.getElementById('tabRecents');
+            const tabBrowse = document.getElementById('tabBrowse');
+            const recentsView = document.getElementById('recentsView');
+            const browseView = document.getElementById('browseView');
+            const folderView = document.getElementById('folderView');
+
+            if (tab === 'recents') {
+                tabRecents.classList.add('tab-active');
+                tabBrowse.classList.remove('tab-active');
+                recentsView.classList.remove('hidden');
+                browseView.classList.add('hidden');
+                folderView.classList.add('hidden');
+                renderRecents();
+            } else {
+                tabBrowse.classList.add('tab-active');
+                tabRecents.classList.remove('tab-active');
+                browseView.classList.remove('hidden');
+                recentsView.classList.add('hidden');
+                folderView.classList.add('hidden');
+            }
+        }
+
+        // Open folder
+        function openFolder(folder) {
+            currentFolder = folder;
+            document.getElementById('browseView').classList.add('hidden');
+            document.getElementById('recentsView').classList.add('hidden');
+            document.getElementById('folderView').classList.remove('hidden');
+            
+            const titles = {
+                all: 'All Photos',
+                moments: 'Moments',
+                events: 'Events',
+                uploads: 'Uploads',
+                profile: 'Profile Photos'
+            };
+            document.getElementById('folderTitle').textContent = titles[folder] || 'Photos';
+            
+            renderFolder();
+        }
+
+        // Back to browse
+        function backToBrowse() {
+            document.getElementById('folderView').classList.add('hidden');
+            document.getElementById('browseView').classList.remove('hidden');
+            updateCounts();
+        }
+
+        // Render folder
+        function renderFolder() {
+            currentPhotos = getPhotosByFolder(currentFolder);
+            const grid = document.getElementById('photoGrid');
+            const list = document.getElementById('photoListContent');
+            const empty = document.getElementById('emptyState');
+            
+            document.getElementById('folderCount').textContent = `${currentPhotos.length} items`;
+
+            if (currentPhotos.length === 0) {
+                empty.classList.remove('hidden');
+                grid.innerHTML = '';
+                list.innerHTML = '';
+                return;
+            }
+
+            empty.classList.add('hidden');
+
+            // Sort photos
+            if (sortBy === 'date') {
+                currentPhotos.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (sortBy === 'name') {
+                currentPhotos.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (sortBy === 'type') {
+                currentPhotos.sort((a, b) => a.type.localeCompare(b.type));
+            }
+
+            // Grid view
+            grid.innerHTML = currentPhotos.map((p, i) => `
+                <div class="aspect-square bg-ios-separator overflow-hidden cursor-pointer photo-thumbnail relative" onclick="handlePhotoClick(${i})">
+                    <img src="${p.src}" class="w-full h-full object-cover" alt="${p.name}">
+                    ${isSelectionMode ? `
+                        <div class="absolute top-1 right-1 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center selection-circle ${selectedPhotos.has(p.id) ? 'bg-ios-blue' : 'bg-black/30'}">
+                            ${selectedPhotos.has(p.id) ? '<i class="fas fa-check text-white text-xs"></i>' : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            // List view
+            list.innerHTML = currentPhotos.map((p, i) => `
+                <div class="flex items-center px-4 py-3 border-b border-ios-separator/30 list-row cursor-pointer" onclick="handlePhotoClick(${i})">
+                    ${isSelectionMode ? `
+                        <div class="w-6 h-6 rounded-full border-2 border-ios-separator mr-3 flex items-center justify-center selection-circle ${selectedPhotos.has(p.id) ? 'bg-ios-blue border-ios-blue' : ''}">
+                            ${selectedPhotos.has(p.id) ? '<i class="fas fa-check text-white text-xs"></i>' : ''}
+                        </div>
+                    ` : ''}
+                    <div class="w-12 h-12 bg-ios-separator rounded-lg overflow-hidden mr-3 flex-shrink-0">
+                        <img src="${p.src}" class="w-full h-full object-cover" alt="${p.name}">
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-base text-ios-text truncate">${p.name}</p>
+                        <p class="text-xs text-ios-secondary">${formatDate(p.date)} • ${p.type}</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-ios-separator text-xs ml-2"></i>
+                </div>
+            `).join('');
+        }
+
+        // Render recents
+        function renderRecents() {
+            const photos = getPhotosByFolder('recents');
+            const grid = document.getElementById('recentsGrid');
+            const empty = document.getElementById('recentsEmpty');
+
+            if (photos.length === 0) {
+                empty.classList.remove('hidden');
+                grid.innerHTML = '';
+                return;
+            }
+
+            empty.classList.add('hidden');
+            currentPhotos = photos;
+
+            grid.innerHTML = photos.map((p, i) => `
+                <div class="aspect-square bg-ios-separator overflow-hidden cursor-pointer photo-thumbnail" onclick="openLightbox(${i})">
+                    <img src="${p.src}" class="w-full h-full object-cover" alt="${p.name}">
+                </div>
+            `).join('');
+        }
+
+        // Handle photo click
+        function handlePhotoClick(index) {
+            if (isSelectionMode) {
+                const photo = currentPhotos[index];
+                if (selectedPhotos.has(photo.id)) {
+                    selectedPhotos.delete(photo.id);
+                } else {
+                    selectedPhotos.add(photo.id);
+                }
+                renderFolder();
+            } else {
+                openLightbox(index);
+            }
+        }
+
+        // Toggle view
+        function toggleView() {
+            const grid = document.getElementById('photoGrid');
+            const list = document.getElementById('photoList');
+            const icon = document.getElementById('viewIcon');
+
+            if (currentView === 'grid') {
+                currentView = 'list';
+                grid.classList.add('hidden');
+                list.classList.remove('hidden');
+                icon.className = 'fas fa-th';
+            } else {
+                currentView = 'grid';
+                grid.classList.remove('hidden');
+                list.classList.add('hidden');
+                icon.className = 'fas fa-list';
+            }
+        }
+
+        // Lightbox
+        function openLightbox(index) {
+            currentPhotoIndex = index;
+            const photo = currentPhotos[index];
+            document.getElementById('lightboxImg').src = photo.src;
+            document.getElementById('lightboxCounter').textContent = `${index + 1} of ${currentPhotos.length}`;
+            document.getElementById('lightbox').classList.remove('hidden');
+            
+            // Show/hide delete based on type
+            if (photo.type === 'upload') {
+                document.getElementById('deleteLightboxBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('deleteLightboxBtn').classList.add('hidden');
+            }
+            
+            updateLightboxNav();
+        }
+
+        function updateLightboxNav() {
+            document.getElementById('prevPhoto').style.display = currentPhotoIndex > 0 ? 'flex' : 'none';
+            document.getElementById('nextPhoto').style.display = currentPhotoIndex < currentPhotos.length - 1 ? 'flex' : 'none';
+        }
+
+        document.getElementById('closeLightbox').onclick = () => {
+            document.getElementById('lightbox').classList.add('hidden');
+        };
+
+        document.getElementById('prevPhoto').onclick = () => {
+            if (currentPhotoIndex > 0) {
+                openLightbox(currentPhotoIndex - 1);
+            }
+        };
+
+        document.getElementById('nextPhoto').onclick = () => {
+            if (currentPhotoIndex < currentPhotos.length - 1) {
+                openLightbox(currentPhotoIndex + 1);
+            }
+        };
+
+        document.getElementById('deleteLightboxBtn').onclick = () => {
+            const photo = currentPhotos[currentPhotoIndex];
+            
+                if (photo.type === 'upload') {
+                const gallery = JSON.parse(localStorage.getItem('loveloggy_gallery') || '[]');
+                const filtered = gallery.filter(g => g.id !== photo.id);
+                saveGallery(filtered);
+                document.getElementById('lightbox').classList.add('hidden');
+                renderFolder();
+                updateCounts();
+            }
+        };
+
+        // Selection mode
+        document.getElementById('selectBtn').onclick = () => {
+            isSelectionMode = !isSelectionMode;
+            selectedPhotos.clear();
+            document.getElementById('selectBtn').textContent = isSelectionMode ? 'Done' : 'Select';
+            document.getElementById('selectionToolbar').classList.toggle('hidden', !isSelectionMode);
+            renderFolder();
+        };
+
+        document.getElementById('cancelSelection').onclick = () => {
+            isSelectionMode = false;
+            selectedPhotos.clear();
+            document.getElementById('selectBtn').textContent = 'Select';
+            document.getElementById('selectionToolbar').classList.add('hidden');
+            renderFolder();
+        };
+
+        document.getElementById('deleteSelected').onclick = () => {
+            const gallery = JSON.parse(localStorage.getItem('loveloggy_gallery') || '[]');
+            const filtered = gallery.filter(g => !selectedPhotos.has(g.id));
+            saveGallery(filtered);
+            isSelectionMode = false;
+            selectedPhotos.clear();
+            document.getElementById('selectBtn').textContent = 'Select';
+            document.getElementById('selectionToolbar').classList.add('hidden');
+            renderFolder();
+            updateCounts();
+        };
+
+        // Sort
+        document.getElementById('sortBtn').onclick = () => {
+            document.getElementById('sortMenu').classList.remove('hidden');
+        };
+
+        function sortPhotos(by) {
+            sortBy = by;
+            closeSortMenu();
+            renderFolder();
+        }
+
+        function closeSortMenu() {
+            document.getElementById('sortMenu').classList.add('hidden');
+        }
+
+        document.getElementById('sortMenu').onclick = (e) => {
+            if (e.target.id === 'sortMenu') closeSortMenu();
+        };
+
+        // View toggle
+        document.getElementById('viewToggle').onclick = toggleView;
+
+        // Upload handlers
+        const fileInput = document.getElementById('fileInput');
+        const cameraInput = document.getElementById('cameraInput');
+
+        document.getElementById('takePhotoBrowse').onclick = () => cameraInput.click();
+        document.getElementById('uploadPhotoBrowse').onclick = () => fileInput.click();
+        document.getElementById('emptyAddBtn').onclick = () => cameraInput.click();
+
+        fileInput.onchange = (e) => {
+            handleImageUpload(e.target.files[0]);
+            fileInput.value = '';
+        };
+
+        cameraInput.onchange = (e) => {
+            handleImageUpload(e.target.files[0]);
+            cameraInput.value = '';
+        };
+
+        function handleImageUpload(file) {
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const gallery = JSON.parse(localStorage.getItem('loveloggy_gallery') || '[]');
+                gallery.push({
+                    id: Date.now(),
+                    src: event.target.result,
+                    uploadedAt: new Date().toISOString()
+                });
+                saveGallery(gallery);
+                updateCounts();
+                if (document.getElementById('folderView').classList.contains('hidden')) {
+                    // Still in browse view
+                } else {
+                    renderFolder();
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Search
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+
+        searchInput.oninput = () => {
+            const query = searchInput.value.toLowerCase();
+            clearSearch.classList.toggle('hidden', !query);
+            
+            if (!document.getElementById('folderView').classList.contains('hidden')) {
+                // In folder view, filter photos
+                const allInFolder = getPhotosByFolder(currentFolder);
+                currentPhotos = query 
+                    ? allInFolder.filter(p => p.name.toLowerCase().includes(query) || p.type.toLowerCase().includes(query))
+                    : allInFolder;
+                renderFilteredPhotos();
+            }
+        };
+
+        clearSearch.onclick = () => {
+            searchInput.value = '';
+            clearSearch.classList.add('hidden');
+            if (!document.getElementById('folderView').classList.contains('hidden')) {
+                renderFolder();
+            }
+        };
+
+        function renderFilteredPhotos() {
+            const grid = document.getElementById('photoGrid');
+            grid.innerHTML = currentPhotos.map((p, i) => `
+                <div class="aspect-square bg-ios-separator overflow-hidden cursor-pointer photo-thumbnail" onclick="openLightbox(${i})">
+                    <img src="${p.src}" class="w-full h-full object-cover" alt="${p.name}">
+                </div>
+            `).join('');
+            document.getElementById('folderCount').textContent = `${currentPhotos.length} items`;
+        }
+
+        // Utility
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return `${Math.floor(diff/60000)}m ago`;
+            if (diff < 86400000) return `${Math.floor(diff/3600000)}h ago`;
+            if (diff < 604800000) return `${Math.floor(diff/86400000)}d ago`;
+            
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        // Initialize
+        updateCounts();
+
+        // Check URL parameters for direct folder navigation
+        const urlParams = new URLSearchParams(window.location.search);
+        const folderParam = urlParams.get('folder');
+        if (folderParam) {
+            // Open directly to the specified folder
+            openFolder(folderParam);
+        }
+
+        // Handle back navigation when in folder view
+        const originalSelectBtn = document.getElementById('selectBtn');
+        const headerBackBtn = document.querySelector('header button');
+        headerBackBtn.onclick = () => {
+            if (!document.getElementById('folderView').classList.contains('hidden')) {
+                backToBrowse();
+            } else {
+                window.location.href = 'space.html';
+            }
+        };
+
+        // Settings Functions
+        let settings = {
+            theme: 'sand',
+            haptic: true,
+            romantic: false,
+            compact: false,
+            sound: true,
+            bubbleStyle: 'rounded'
+        };
+
+        function loadSettings() {
+            const saved = localStorage.getItem('loveloggy_settings');
+            if (saved) {
+                settings = { ...settings, ...JSON.parse(saved) };
+            }
+            applySettings();
+        }
+
+        function saveSettings() {
+            localStorage.setItem('loveloggy_settings', JSON.stringify(settings));
+        }
+
+        function applySettings() {
+            // Apply theme
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('border-ios-blue', 'ring-2', 'ring-ios-blue');
+                if (btn.dataset.theme === settings.theme) {
+                    btn.classList.add('border-ios-blue', 'ring-2', 'ring-ios-blue');
+                }
+            });
+
+            // Apply toggles
+            document.getElementById('hapticToggle').checked = settings.haptic;
+            document.getElementById('romanticToggle').checked = settings.romantic;
+            document.getElementById('compactToggle').checked = settings.compact;
+            document.getElementById('soundToggle').checked = settings.sound;
+
+            // Apply bubble style
+            document.querySelectorAll('.bubble-btn').forEach(btn => {
+                btn.classList.remove('border-ios-blue', 'bg-ios-blue/10');
+                if (btn.dataset.style === settings.bubbleStyle) {
+                    btn.classList.add('border-ios-blue', 'bg-ios-blue/10');
+                }
+            });
+
+            // Show love quote if romantic mode
+            const quoteEl = document.getElementById('loveQuote');
+            if (settings.romantic && quoteEl) {
+                const quotes = [
+                    "Love is composed of a single soul inhabiting two bodies.",
+                    "The best thing to hold onto in life is each other.",
+                    "In all the world, there is no heart for me like yours.",
+                    "You are my today and all of my tomorrows.",
+                    "I love you not only for what you are, but for what I am when I am with you."
+                ];
+                document.getElementById('quoteText').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+                quoteEl.classList.remove('hidden');
+            } else if (quoteEl) {
+                quoteEl.classList.add('hidden');
+            }
+        }
+
+        function showSettings() {
+            document.querySelector('.settings-backdrop').classList.remove('hidden');
+            document.getElementById('settingsPanel').style.transform = 'translateX(0)';
+        }
+
+        function hideSettings() {
+            document.querySelector('.settings-backdrop').classList.add('hidden');
+            document.getElementById('settingsPanel').style.transform = 'translateX(100%)';
+        }
+
+        function setTheme(theme) {
+            settings.theme = theme;
+            saveSettings();
+            applySettings();
+        }
+
+        function toggleSetting(setting) {
+            settings[setting] = !settings[setting];
+            saveSettings();
+            applySettings();
+        }
+
+        function setBubbleStyle(style) {
+            settings.bubbleStyle = style;
+            saveSettings();
+            applySettings();
+        }
+
+        loadSettings();
+    </script>
+</body>
+</html>

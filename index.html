@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LoveLoggy — Your Private Couple Space</title>
+    
+    <!-- SEO & Meta -->
+    <meta name="description" content="LoveLoggy - A private, encrypted space for couples to chat, share memories, track milestones, and celebrate your love story together.">
+    <meta name="keywords" content="couples app, relationship tracker, love journal, private chat, anniversary tracker">
+    <meta name="author" content="LoveLoggy">
+    <meta name="theme-color" content="#9E8C78">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="./assets/icon-192.png">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'DM Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        sand: {
+                            100: '#F7F5F2',
+                            200: '#EBE7E0',
+                            300: '#A69C8E',
+                            400: '#A69C8E',
+                            500: '#8B7E74',
+                            600: '#5D5752',
+                        },
+                        clay: '#9E8C78',
+                        ios: {
+                            blue: '#007AFF',
+                            bg: '#EBE7E0',
+                            card: '#FFFFFF',
+                            separator: '#C6C6C8',
+                            text: '#000000',
+                            secondary: '#8E8E93',
+                            red: '#FF3B30',
+                            green: '#34C759'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(139, 126, 116, 0.15)',
+                        'floating': '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
+                    },
+                    rotate: {
+                        '1': '1deg',
+                        '-1': '-1deg',
+                        '2': '2deg',
+                        '-2': '-2deg',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .ios-blur {
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-ios-bg text-ios-text antialiased h-screen w-full overflow-hidden flex items-center justify-center selection:bg-ios-blue selection:text-white">
+
+    <div class="w-full max-w-md h-full bg-sand-200 relative flex flex-col shadow-2xl overflow-hidden">
+
+        <!-- Login / Signup Screen -->
+        <div id="authScreen" class="absolute inset-0 z-20 flex flex-col justify-center px-8 transition-all duration-500 ease-in-out">
+
+            <div class="relative mb-6 text-center">
+                <div class="inline-block p-5 rounded-3xl bg-gradient-to-br from-pink-100 to-purple-100 shadow-soft mb-4 transform hover:scale-105 transition-transform">
+                    <span class="text-5xl">💕</span>
+                </div>
+                <h1 class="text-3xl font-bold text-sand-600 tracking-tight">LoveLoggy</h1>
+                <p id="authSubtitle" class="text-sand-400 mt-2">Create your shared space for two — start by setting up your account.</p>
+            </div>
+
+            <div class="bg-sand-100/70 p-6 rounded-3xl shadow-floating">
+                <div class="flex gap-2 mb-4">
+                    <button id="btnLogin" class="flex-1 py-2 rounded-xl bg-sand-600 text-white font-medium" onclick="showLogin()">Log in</button>
+                    <button id="btnSignup" class="flex-1 py-2 rounded-xl bg-sand-100 text-sand-500 font-medium" onclick="showSignup()">Sign up</button>
+                </div>
+
+                <!-- Login form -->
+                <form id="loginForm" class="space-y-4" onsubmit="event.preventDefault(); handleLogin();">
+                    <input id="loginEmail" type="email" placeholder="Email address" required
+                        class="w-full bg-white rounded-2xl py-3 px-4 text-sand-600 placeholder-sand-400 shadow-sm focus:ring-2 focus:ring-clay/20 outline-none">
+
+                    <input id="loginPassword" type="password" placeholder="Password" required
+                        class="w-full bg-white rounded-2xl py-3 px-4 text-sand-600 placeholder-sand-400 shadow-sm focus:ring-2 focus:ring-clay/20 outline-none">
+
+                    <button type="submit" class="w-full bg-sand-600 text-white font-medium py-3 rounded-2xl shadow-md">Enter Space</button>
+
+                    <div class="flex items-center justify-between text-xs text-sand-400 mt-2">
+                        <a href="#" onclick="showSignup(); return false;" class="hover:text-clay">Create an account</a>
+                        <a href="#" class="hover:text-clay">Forgot?</a>
+                    </div>
+                </form>
+
+                <!-- Signup form (first-time shared space) -->
+                <form id="signupForm" class="hidden space-y-4" onsubmit="event.preventDefault(); handleSignup();">
+                    <input id="signupName" type="text" placeholder="Your full name" required
+                        class="w-full bg-white rounded-2xl py-3 px-4 text-sand-600 placeholder-sand-400 shadow-sm focus:ring-2 focus:ring-clay/20 outline-none">
+
+                    <input id="signupEmail" type="email" placeholder="Your email address" required
+                        class="w-full bg-white rounded-2xl py-3 px-4 text-sand-600 placeholder-sand-400 shadow-sm focus:ring-2 focus:ring-clay/20 outline-none">
+
+                    <input id="signupPassword" type="password" placeholder="Create a passcode" required minlength="4"
+                        class="w-full bg-white rounded-2xl py-3 px-4 text-sand-600 placeholder-sand-400 shadow-sm focus:ring-2 focus:ring-clay/20 outline-none">
+
+                    <input id="signupPartnerName" type="text" placeholder="Partner's name (optional)"
+                        class="w-full bg-white rounded-2xl py-3 px-4 text-sand-600 placeholder-sand-400 shadow-sm focus:ring-2 focus:ring-clay/20 outline-none">
+
+                    <input id="signupStartDate" type="date" placeholder="Relationship start date" required
+                        class="w-full bg-white rounded-2xl py-3 px-4 text-sand-600 placeholder-sand-400 shadow-sm focus:ring-2 focus:ring-clay/20 outline-none">
+
+                    <div class="flex items-center gap-3">
+                        <input id="profilePic" type="file" accept="image/*" class="hidden" onchange="previewPic(event)">
+                        <button type="button" onclick="document.getElementById('profilePic').click();" class="px-3 py-2 bg-sand-100 rounded-xl text-sand-500">Upload photo</button>
+                        <div id="picPreview" class="w-12 h-12 rounded-xl bg-gray-200 overflow-hidden"></div>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-xs text-sand-500">
+                        <input id="agreeTerms" type="checkbox" required class="accent-clay">
+                        <label for="agreeTerms">I agree to the terms and community guidelines</label>
+                    </div>
+
+                    <button type="submit" class="w-full bg-clay text-white font-medium py-3 rounded-2xl shadow-md">Create shared space</button>
+                </form>
+
+                <div class="mt-3 text-center text-xs text-sand-400">Or continue with</div>
+                <div class="flex gap-3 mt-2">
+                    <button class="flex-1 py-2 rounded-xl bg-white text-sand-600 shadow-sm">Continue with Google</button>
+                    <button class="flex-1 py-2 rounded-xl bg-white text-sand-600 shadow-sm">Continue with Apple</button>
+                </div>
+            </div>
+
+            <p class="text-center text-xs text-sand-400 mt-6">Your credentials are stored securely in your browser.</p>
+        </div>
+
+        <!-- App Screen (mock) -->
+        <div id="appScreen" class="absolute inset-0 z-10 opacity-0 translate-y-10 pointer-events-none transition-all duration-700 flex flex-col">
+
+            <!-- Top quick-section row: Dates / Gallery / Goals / Resolutions (moved above header) -->
+            <div class="px-6 pt-4 pb-1 bg-sand-200/90 z-31 sticky top-0">
+                <div class="flex items-center justify-between mb-2">
+                    <div>
+                        <h2 id="appTitle" class="text-xl font-bold text-sand-600">Explore Matches</h2>
+                        <p id="appSubtitle" class="text-xs text-sand-400">Welcome</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="logout()" class="text-xs text-clay underline">Log out</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 overflow-x-auto no-scrollbar">
+                    <button onclick="window.location.href='calendar.html'" class="flex-shrink-0 flex items-center gap-3 bg-white/80 hover:bg-white rounded-2xl px-3 py-2 shadow-sm">
+                        <span class="text-2xl">�️</span>
+                        <span class="text-sm font-medium text-sand-600">Dates</span>
+                    </button>
+
+                    <button onclick="window.location.href='gallery.html'" class="flex-shrink-0 flex items-center gap-3 bg-white/80 hover:bg-white rounded-2xl px-3 py-2 shadow-sm">
+                        <span class="text-2xl">✨</span>
+                        <span class="text-sm font-medium text-sand-600">Gallery</span>
+                    </button>
+
+                    <button onclick="window.location.href='journey.html'" class="flex-shrink-0 flex items-center gap-3 bg-white/80 hover:bg-white rounded-2xl px-3 py-2 shadow-sm">
+                        <span class="text-2xl">�</span>
+                        <span class="text-sm font-medium text-sand-600">Journal</span>
+                    </button>
+
+                    <button onclick="window.location.href='goals.html'" class="flex-shrink-0 flex items-center gap-3 bg-white/80 hover:bg-white rounded-2xl px-3 py-2 shadow-sm">
+                        <span class="text-2xl">�</span>
+                        <span class="text-sm font-medium text-sand-600">Goals</span>
+                    </button>
+
+                    <button onclick="window.location.href='resolutions.html'" class="flex-shrink-0 flex items-center gap-3 bg-white/80 hover:bg-white rounded-2xl px-3 py-2 shadow-sm">
+                        <span class="text-2xl">�</span>
+                        <span class="text-sm font-medium text-sand-600">Resolutions</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-4 pb-24 space-y-6 no-scrollbar">
+                <!-- Compact event timeline at top -->
+                <div id="timelineBox" class="bg-white rounded-2xl p-3 shadow-sm mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-sm font-bold text-sand-500">Timeline</h4>
+                        <button id="timelineMore" class="text-xs text-clay underline">View all</button>
+                    </div>
+                    <div id="timelineList" class="space-y-2 text-sm text-sand-600">
+                        <!-- timeline items injected here -->
+                    </div>
+                </div>
+
+                <!-- App content will appear here once logged in -->
+            </div>
+
+            <div class="absolute bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
+                <button class="pointer-events-auto bg-sand-600 text-white w-14 h-14 rounded-full shadow-xl shadow-sand-600/30 flex items-center justify-center transform hover:scale-110 transition-all active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-sand-200 to-transparent pointer-events-none z-20"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // UI toggles
+        function showSignup(){
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('signupForm').classList.remove('hidden');
+            document.getElementById('btnLogin').classList.remove('bg-sand-600','text-white');
+            document.getElementById('btnLogin').classList.add('bg-sand-100','text-sand-500');
+            document.getElementById('btnSignup').classList.remove('bg-sand-100','text-sand-500');
+            document.getElementById('btnSignup').classList.add('bg-sand-600','text-white');
+            document.getElementById('authSubtitle').textContent = 'Create your shared space for two — start by setting up your account.';
+        }
+
+        function showLogin(){
+            document.getElementById('signupForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('btnSignup').classList.remove('bg-sand-600','text-white');
+            document.getElementById('btnSignup').classList.add('bg-sand-100','text-sand-500');
+            document.getElementById('btnLogin').classList.remove('bg-sand-100','text-sand-500');
+            document.getElementById('btnLogin').classList.add('bg-sand-600','text-white');
+            document.getElementById('authSubtitle').textContent = 'Welcome back — enter your shared space.';
+        }
+
+        // Preview uploaded profile picture
+        // Preview uploaded profile picture and store dataURL (demo only)
+        function previewPic(e){
+            const file = e.target.files[0];
+            const preview = document.getElementById('picPreview');
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev){
+                const dataUrl = ev.target.result;
+                // show preview
+                preview.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
+                // keep for storing with user
+                window.loveloggy_profile_pic = dataUrl;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // Simple client-side storage (demo only)
+        function handleSignup(){
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const partnerName = document.getElementById('signupPartnerName').value.trim();
+            const startDate = document.getElementById('signupStartDate').value;
+            const agreed = document.getElementById('agreeTerms').checked;
+
+            if(!name || !email || !password || !startDate || !agreed){
+                alert('Please complete all required fields and accept the terms.');
+                return;
+            }
+
+            // For demo, store user and credentials in localStorage (normalized keys)
+            const user = { name, email, partnerName: partnerName || null, startDate, profilePic: window.loveloggy_profile_pic || null };
+            localStorage.setItem('loveloggy_user', JSON.stringify(user));
+            localStorage.setItem('loveloggy_creds', JSON.stringify({ email, password }));
+
+            // Redirect to profile page to complete relationship profile
+            window.location.href = 'profile.html';
+        }
+
+        function handleLogin(){
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            const creds = JSON.parse(localStorage.getItem('loveloggy_creds') || 'null');
+            const user = JSON.parse(localStorage.getItem('loveloggy_user') || 'null');
+
+            // Very simple demo check: if creds exist and email/password match
+            if(creds && creds.email === email && password === creds.password){
+                // If relationship profile is incomplete, send user to profile setup page
+                const hasProfile = user && user.partnerName && user.startDate && user.relationshipStatus;
+                if(!hasProfile){
+                    // store current email in case profile page needs it
+                    localStorage.setItem('loveloggy_current', email);
+                    window.location.href = 'profile.html';
+                } else {
+                    // already has profile — go to the app
+                    window.location.href = 'space.html';
+                }
+            } else {
+                alert('No account matches that email/password. Try Sign up.');
+            }
+        }
+
+        function daysTogether(startDate){
+            try{
+                const msPerDay = 24*60*60*1000;
+                const start = new Date(startDate);
+                const now = new Date();
+                const diff = Math.floor((now - start)/msPerDay);
+                return diff >= 0 ? diff : 0;
+            }catch(e){ return 0; }
+        }
+
+        function goToApp(user){
+            const authScreen = document.getElementById('authScreen');
+            const appScreen = document.getElementById('appScreen');
+            const appSubtitle = document.getElementById('appSubtitle');
+            const appTitle = document.getElementById('appTitle');
+
+            // simple animation
+            authScreen.style.opacity = '0';
+            authScreen.style.pointerEvents = 'none';
+            authScreen.style.transform = 'scale(0.96)';
+
+            setTimeout(() => {
+                appTitle.textContent = 'Shared Space';
+                if(user && user.startDate){
+                    const days = daysTogether(user.startDate);
+                    appSubtitle.textContent = `${user.name || 'You'} & ${user.partnerName || 'Partner'} — Together ${days} day${days===1?'':'s'}`;
+                } else {
+                    appSubtitle.textContent = user ? `Welcome, ${user.name}` : 'Welcome';
+                }
+                appScreen.style.opacity = '1';
+                appScreen.style.transform = 'translateY(0)';
+                appScreen.style.pointerEvents = 'auto';
+                // render timeline when showing the app
+                try{ renderTimeline(); }catch(e){}
+            }, 300);
+        }
+
+        function logout(){
+            const authScreen = document.getElementById('authScreen');
+            const appScreen = document.getElementById('appScreen');
+
+            appScreen.style.opacity = '0';
+            appScreen.style.pointerEvents = 'none';
+            appScreen.style.transform = 'translateY(10px)';
+
+            setTimeout(() => {
+                authScreen.style.opacity = '1';
+                authScreen.style.pointerEvents = 'auto';
+                authScreen.style.transform = 'scale(1)';
+                showLogin();
+            }, 200);
+        }
+
+        // Init: show login view
+        showLogin();
+
+        // Events/timeline utilities (compact rendering for index app screen)
+        function loadEvents(){
+            try{ return JSON.parse(localStorage.getItem('loveloggy_events')||'[]'); }catch(e){return []}
+        }
+
+        function renderTimeline(){
+            const list = document.getElementById('timelineList');
+            if(!list) return;
+            list.innerHTML = '';
+            const events = loadEvents();
+            if(!events || events.length===0){
+                list.innerHTML = '<p class="text-xs text-sand-400">No events yet — add one with the + button.</p>';
+                return;
+            }
+            // show most recent 3 events
+            events.sort((a,b)=> new Date(b.datetime) - new Date(a.datetime));
+            const recent = events.slice(0,3);
+            recent.forEach(ev=>{
+                const item = document.createElement('div');
+                item.className = 'flex items-start gap-3';
+                const mood = ev.mood==='love'? '❤️' : ev.mood==='sad'? '😢' : ev.mood==='angry'? '😡' : '😐';
+                const dateStr = ev.datetime ? new Date(ev.datetime).toLocaleDateString() : '';
+                item.innerHTML = `
+                    <div class="w-9 h-9 rounded-full bg-sand-100 flex items-center justify-center text-sm">${mood}</div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm font-medium text-sand-600 truncate">${escapeHtml(ev.title || 'Event')}</div>
+                            <div class="text-[10px] text-sand-400 ml-2">${dateStr}</div>
+                        </div>
+                        <div class="text-xs text-sand-500">${escapeHtml((ev.description||'').slice(0,80))}</div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function escapeHtml(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        // wire timeline "View all" to open space.html where full timeline lives
+        document.getElementById('timelineMore')?.addEventListener('click', ()=>{ window.location.href='space.html'; });
+    </script>
+</body>
+</html>

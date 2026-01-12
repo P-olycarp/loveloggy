@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relationship Stats • LoveLoggy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'DM Sans', 'sans-serif']
+                    },
+                    colors: {
+                        sand: {
+                            50: '#F7F5F2',
+                            100: '#EBE7E0',
+                            200: '#EBE7E0',
+                            300: '#A69C8E',
+                            500: '#8B7E74',
+                            600: '#5D5752'
+                        },
+                        clay: '#9E8C78',
+                        ios: {
+                            blue: '#007AFF',
+                            bg: '#EBE7E0',
+                            card: '#FFFFFF',
+                            separator: '#C6C6C8',
+                            text: '#000000',
+                            secondary: '#8E8E93',
+                            red: '#FF3B30',
+                            green: '#34C759'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .ios-blur {
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+        @media (max-width: 380px) {
+            .nav-item span { font-size: 9px !important; }
+            .nav-item i { font-size: 18px !important; }
+        }
+    </style>
+    <script src="src/auth.js"></script>
+    <script src="src/settings.js"></script>
+</head>
+<body class="bg-ios-bg font-sans">
+    <div class="max-w-md mx-auto bg-ios-bg min-h-screen relative">
+        <!-- Header -->
+        <div class="px-4 pt-6 pb-4 bg-ios-bg/90 ios-blur sticky top-0 z-10 border-b border-ios-separator/30">
+            <h1 class="text-2xl font-bold text-ios-text mb-2">Relationship Stats</h1>
+            <p class="text-xs text-ios-secondary">Your journey together</p>
+        </div>
+
+        <!-- Content -->
+        <div class="px-4 pb-24 space-y-4">
+            <!-- Days Together -->
+            <div class="bg-gradient-to-br from-ios-blue to-ios-blue/80 rounded-2xl p-6 text-white shadow-lg">
+                <p class="text-sm opacity-80 mb-1">Days Together</p>
+                <p id="daysTogether" class="text-5xl font-bold mb-2">0</p>
+                <p class="text-xs opacity-70">Since <span id="startDateText">—</span></p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-ios-card rounded-2xl p-4 shadow-sm border border-ios-separator/30">
+                    <span class="text-3xl mb-2 block">📝</span>
+                    <p id="entriesCount" class="text-2xl font-bold text-ios-text">0</p>
+                    <p class="text-xs text-ios-secondary">Journal Entries</p>
+                </div>
+
+                <div class="bg-ios-card rounded-2xl p-4 shadow-sm border border-ios-separator/30">
+                    <span class="text-3xl mb-2 block">🎉</span>
+                    <p id="eventsCount" class="text-2xl font-bold text-ios-text">0</p>
+                    <p class="text-xs text-ios-secondary">Events Tracked</p>
+                </div>
+
+                <div class="bg-ios-card rounded-2xl p-4 shadow-sm border border-ios-separator/30">
+                    <span class="text-3xl mb-2 block">📸</span>
+                    <p id="photosCount" class="text-2xl font-bold text-ios-text">0</p>
+                    <p class="text-xs text-ios-secondary">Photos Shared</p>
+                </div>
+
+                <div class="bg-ios-card rounded-2xl p-4 shadow-sm border border-ios-separator/30">
+                    <span class="text-3xl mb-2 block">📅</span>
+                    <p id="datesCount" class="text-2xl font-bold text-ios-text">0</p>
+                    <p class="text-xs text-ios-secondary">Important Dates</p>
+                </div>
+
+                <div class="bg-ios-card rounded-2xl p-4 shadow-sm border border-ios-separator/30">
+                    <span class="text-3xl mb-2 block">🎯</span>
+                    <p id="goalsCount" class="text-2xl font-bold text-ios-text">0</p>
+                    <p class="text-xs text-ios-secondary">Goals Set</p>
+                </div>
+
+                <div class="bg-ios-card rounded-2xl p-4 shadow-sm border border-ios-separator/30">
+                    <span class="text-3xl mb-2 block">🏳️</span>
+                    <p id="resolutionsCount" class="text-2xl font-bold text-ios-text">0</p>
+                    <p class="text-xs text-ios-secondary">Resolutions</p>
+                </div>
+            </div>
+
+            <!-- Activity Section -->
+            <div class="bg-ios-card rounded-2xl p-4 shadow-sm border border-ios-separator/30">
+                <h3 class="text-sm font-bold text-ios-text mb-3">Recent Activity</h3>
+                <div id="activityList" class="space-y-2">
+                    <!-- Activity items will be injected here -->
+                </div>
+                <div id="noActivity" class="text-center py-6 text-ios-secondary text-xs">
+                    No activity yet
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-backdrop hidden fixed inset-0 bg-black/50 z-50" onclick="hideSettings()"></div>
+        <div id="settingsPanel" class="settings-panel fixed right-0 top-0 h-full w-80 max-w-[85vw] bg-ios-card shadow-2xl z-50 transform translate-x-full transition-transform duration-300 overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-ios-text">Settings</h2>
+                    <button onclick="hideSettings()" class="w-8 h-8 rounded-full bg-ios-bg flex items-center justify-center">
+                        <i class="fas fa-times text-ios-secondary"></i>
+                    </button>
+                </div>
+                
+                <!-- Theme Selection -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-ios-text mb-3">App Theme</h3>
+                    <div class="grid grid-cols-5 gap-2" id="themeGrid">
+                        <button onclick="setTheme('sand')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#EBE7E0] to-[#D4CFC4] border-2 border-transparent hover:scale-110 transition-transform" data-theme="sand" title="Sand"></button>
+                        <button onclick="setTheme('rose')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#FFE4E6] to-[#FECDD3] border-2 border-transparent hover:scale-110 transition-transform" data-theme="rose" title="Rose"></button>
+                        <button onclick="setTheme('ocean')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#CFFAFE] to-[#A5F3FC] border-2 border-transparent hover:scale-110 transition-transform" data-theme="ocean" title="Ocean"></button>
+                        <button onclick="setTheme('midnight')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#1E1B4B] to-[#312E81] border-2 border-transparent hover:scale-110 transition-transform" data-theme="midnight" title="Midnight"></button>
+                        <button onclick="setTheme('lavender')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#EDE9FE] to-[#DDD6FE] border-2 border-transparent hover:scale-110 transition-transform" data-theme="lavender" title="Lavender"></button>
+                    </div>
+                </div>
+                
+                <!-- Toggle Options -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-ios-bg rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-vibrate text-ios-blue"></i>
+                            <span class="text-sm text-ios-text">Haptic Feedback</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="hapticToggle" class="sr-only peer" onchange="toggleSetting('haptic')">
+                            <div class="w-11 h-6 bg-ios-separator rounded-full peer peer-checked:bg-ios-green transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-ios-bg rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-heart text-ios-red"></i>
+                            <span class="text-sm text-ios-text">Romantic Mode</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="romanticToggle" class="sr-only peer" onchange="toggleSetting('romantic')">
+                            <div class="w-11 h-6 bg-ios-separator rounded-full peer peer-checked:bg-ios-green transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-ios-bg rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-compress-alt text-ios-secondary"></i>
+                            <span class="text-sm text-ios-text">Compact Mode</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="compactToggle" class="sr-only peer" onchange="toggleSetting('compact')">
+                            <div class="w-11 h-6 bg-ios-separator rounded-full peer peer-checked:bg-ios-green transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-ios-bg rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-volume-up text-ios-blue"></i>
+                            <span class="text-sm text-ios-text">Sound Effects</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="soundToggle" class="sr-only peer" onchange="toggleSetting('sound')">
+                            <div class="w-11 h-6 bg-ios-separator rounded-full peer peer-checked:bg-ios-green transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Bubble Style -->
+                <div class="mt-6">
+                    <h3 class="text-sm font-semibold text-ios-text mb-3">Bubble Style</h3>
+                    <div class="flex gap-2">
+                        <button onclick="setBubbleStyle('rounded')" class="bubble-btn flex-1 py-2 px-3 rounded-xl bg-ios-bg text-xs text-ios-text border-2 border-transparent" data-style="rounded">Rounded</button>
+                        <button onclick="setBubbleStyle('square')" class="bubble-btn flex-1 py-2 px-3 rounded-lg bg-ios-bg text-xs text-ios-text border-2 border-transparent" data-style="square">Square</button>
+                        <button onclick="setBubbleStyle('sharp')" class="bubble-btn flex-1 py-2 px-3 rounded-none bg-ios-bg text-xs text-ios-text border-2 border-transparent" data-style="sharp">Sharp</button>
+                    </div>
+                </div>
+                
+                <!-- Love Quote -->
+                <div id="loveQuote" class="mt-6 p-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl hidden">
+                    <p class="text-sm text-ios-text italic text-center" id="quoteText"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 ios-blur border-t border-ios-separator/30 px-4 py-2 flex justify-around items-center z-40">
+            <a href="space.html" class="nav-item flex flex-col items-center gap-1 py-1 min-w-[50px]">
+                <i class="fas fa-home text-ios-secondary text-xl"></i>
+                <span class="text-[10px] text-ios-secondary">Home</span>
+            </a>
+            <a href="calendar.html" class="nav-item flex flex-col items-center gap-1 py-1 min-w-[50px]">
+                <i class="fas fa-calendar text-ios-secondary text-xl"></i>
+                <span class="text-[10px] text-ios-secondary">Calendar</span>
+            </a>
+            <a href="journey.html" class="nav-item flex flex-col items-center gap-1 py-1 min-w-[50px]">
+                <i class="fas fa-heart text-ios-secondary text-xl"></i>
+                <span class="text-[10px] text-ios-secondary">Journey</span>
+            </a>
+            <a href="chat.html" class="nav-item flex flex-col items-center gap-1 py-1 min-w-[50px]">
+                <i class="fas fa-comments text-ios-secondary text-xl"></i>
+                <span class="text-[10px] text-ios-secondary">Chat</span>
+            </a>
+            <button onclick="showSettings()" class="nav-item flex flex-col items-center gap-1 py-1 min-w-[50px]">
+                <i class="fas fa-bars text-ios-secondary text-xl"></i>
+                <span class="text-[10px] text-ios-secondary">More</span>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Check login via auth module
+        const user = window.LoveLoggyAuth && LoveLoggyAuth.getCurrentUser ? LoveLoggyAuth.getCurrentUser() : JSON.parse(localStorage.getItem('loveloggy_user') || 'null');
+        if (!user) {
+            window.location.href = 'index.html';
+        }
+
+        function daysBetween(start, end) {
+            const diff = Math.abs(end - start);
+            return Math.floor(diff / (1000 * 60 * 60 * 24));
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+        }
+
+        function timeAgo(dateStr) {
+            const now = new Date();
+            const then = new Date(dateStr);
+            const seconds = Math.floor((now - then) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+            return formatDate(dateStr);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function loadAllPhotos() {
+            let count = 0;
+            if (user.profilePic) count++;
+            if (user.partnerPhoto) count++;
+            
+            const events = JSON.parse(localStorage.getItem('loveloggy_events') || '[]');
+            events.forEach(e => { if (e.photo) count++; });
+            
+            const entries = JSON.parse(localStorage.getItem('loveloggy_entries') || '[]');
+            entries.forEach(e => { if (e.image) count++; });
+            
+            const gallery = JSON.parse(localStorage.getItem('loveloggy_gallery') || '[]');
+            count += gallery.length;
+            
+            return count;
+        }
+
+        function render() {
+            // Days together
+            if (user.startDate) {
+                const days = daysBetween(new Date(user.startDate), new Date());
+                document.getElementById('daysTogether').textContent = days;
+                document.getElementById('startDateText').textContent = formatDate(user.startDate);
+            }
+
+            // Counts
+            const entries = JSON.parse(localStorage.getItem('loveloggy_entries') || '[]');
+            const events = JSON.parse(localStorage.getItem('loveloggy_events') || '[]');
+            const dates = JSON.parse(localStorage.getItem('loveloggy_dates') || '[]');
+            const goals = JSON.parse(localStorage.getItem('loveloggy_goals') || '[]');
+            const resolutions = JSON.parse(localStorage.getItem('loveloggy_resolutions') || '[]');
+
+            document.getElementById('entriesCount').textContent = entries.length;
+            document.getElementById('eventsCount').textContent = events.length;
+            document.getElementById('photosCount').textContent = loadAllPhotos();
+            document.getElementById('datesCount').textContent = dates.length;
+            document.getElementById('goalsCount').textContent = goals.length;
+            document.getElementById('resolutionsCount').textContent = resolutions.length;
+
+            // Recent activity
+            const activities = [];
+            
+            entries.forEach(e => {
+                if (e.date) activities.push({ type: '📝', text: 'Added journal entry', date: e.date });
+            });
+            
+            events.forEach(e => {
+                if (e.date) activities.push({ type: '🎉', text: `Event: ${e.title}`, date: e.date });
+            });
+
+            activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const recent = activities.slice(0, 5);
+
+            const activityList = document.getElementById('activityList');
+            const noActivity = document.getElementById('noActivity');
+
+            if (recent.length === 0) {
+                activityList.innerHTML = '';
+                noActivity.classList.remove('hidden');
+            } else {
+                noActivity.classList.add('hidden');
+                activityList.innerHTML = recent.map(a => `
+                    <div class="flex items-center gap-3 py-2 border-b border-sand-50 last:border-0">
+                        <span class="text-xl">${a.type}</span>
+                        <div class="flex-1">
+                            <p class="text-xs text-sand-600">${escapeHtml(a.text)}</p>
+                            <p class="text-[10px] text-sand-400">${timeAgo(a.date)}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        render();
+
+        // Settings Functions
+        let settings = {
+            theme: 'sand',
+            haptic: true,
+            romantic: false,
+            compact: false,
+            sound: true,
+            bubbleStyle: 'rounded'
+        };
+
+        function loadSettings() {
+            const saved = localStorage.getItem('loveloggy_settings');
+            if (saved) {
+                settings = { ...settings, ...JSON.parse(saved) };
+            }
+            applySettings();
+        }
+
+        function saveSettings() {
+            localStorage.setItem('loveloggy_settings', JSON.stringify(settings));
+        }
+
+        function applySettings() {
+            // Apply theme
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('border-ios-blue', 'ring-2', 'ring-ios-blue');
+                if (btn.dataset.theme === settings.theme) {
+                    btn.classList.add('border-ios-blue', 'ring-2', 'ring-ios-blue');
+                }
+            });
+
+            // Apply toggles
+            document.getElementById('hapticToggle').checked = settings.haptic;
+            document.getElementById('romanticToggle').checked = settings.romantic;
+            document.getElementById('compactToggle').checked = settings.compact;
+            document.getElementById('soundToggle').checked = settings.sound;
+
+            // Apply bubble style
+            document.querySelectorAll('.bubble-btn').forEach(btn => {
+                btn.classList.remove('border-ios-blue', 'bg-ios-blue/10');
+                if (btn.dataset.style === settings.bubbleStyle) {
+                    btn.classList.add('border-ios-blue', 'bg-ios-blue/10');
+                }
+            });
+
+            // Show love quote if romantic mode
+            const quoteEl = document.getElementById('loveQuote');
+            if (settings.romantic && quoteEl) {
+                const quotes = [
+                    "Love is composed of a single soul inhabiting two bodies.",
+                    "The best thing to hold onto in life is each other.",
+                    "In all the world, there is no heart for me like yours.",
+                    "You are my today and all of my tomorrows.",
+                    "I love you not only for what you are, but for what I am when I am with you."
+                ];
+                document.getElementById('quoteText').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+                quoteEl.classList.remove('hidden');
+            } else if (quoteEl) {
+                quoteEl.classList.add('hidden');
+            }
+        }
+
+        function showSettings() {
+            document.querySelector('.settings-backdrop').classList.remove('hidden');
+            document.getElementById('settingsPanel').style.transform = 'translateX(0)';
+        }
+
+        function hideSettings() {
+            document.querySelector('.settings-backdrop').classList.add('hidden');
+            document.getElementById('settingsPanel').style.transform = 'translateX(100%)';
+        }
+
+        function setTheme(theme) {
+            settings.theme = theme;
+            saveSettings();
+            applySettings();
+        }
+
+        function toggleSetting(setting) {
+            settings[setting] = !settings[setting];
+            saveSettings();
+            applySettings();
+        }
+
+        function setBubbleStyle(style) {
+            settings.bubbleStyle = style;
+            saveSettings();
+            applySettings();
+        }
+
+        loadSettings();
+    </script>
+</body>
+</html>

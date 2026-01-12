@@ -1,0 +1,26 @@
+{
+  "users": [],
+  "couples": [],
+  "messages": [],
+  "keys": [],
+  "user1": {
+    "id": "1978c91d-0acc-4023-90fb-ca3fc0b4dc75",
+    "name": "Alice",
+    "email": "user1@test.com",
+    "passwordHash": "$2b$10$ADXxOZSqtAnJwEqOMKUIBeW8FX.rJAOZmfFth0drnpnSQe5KVXr5O",
+    "profilePic": null,
+    "createdAt": "2026-01-12T17:10:42.539Z"
+  },
+  "inviteCode": "8V5F4B",
+  "startDate": null,
+  "createdAt": "2026-01-12T17:10:42.539Z",
+  "user2": {
+    "id": "bebbc0bf-2365-4ceb-a794-4aca6a965352",
+    "name": "Bob",
+    "email": "user2@test.com",
+    "passwordHash": "$2b$10$heshsh0G3NKrQRFanX7fx.BSDl306ueS03bZ.0nNC7KNRIW93oKcW",
+    "profilePic": null,
+    "createdAt": "2026-01-12T17:10:52.337Z"
+  },
+  "pairedAt": "2026-01-12T17:10:52.337Z"
+}

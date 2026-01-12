@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoveLoggy | Our Space</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'DM Sans', 'sans-serif']
+                    },
+                    colors: {
+                        sand: {
+                            50: '#F7F5F2',
+                            100: '#EBE7E0',
+                            200: '#EBE7E0',
+                            300: '#A69C8E',
+                            500: '#8B7E74',
+                            600: '#5D5752',
+                        },
+                        clay: '#9E8C78',
+                        heart: '#D67D7D',
+                        ios: {
+                            blue: '#007AFF',
+                            bg: '#EBE7E0',
+                            card: '#FFFFFF',
+                            separator: '#C6C6C8',
+                            text: '#000000',
+                            secondary: '#8E8E93',
+                            red: '#FF3B30',
+                            green: '#34C759',
+                            orange: '#FF9500',
+                            pink: '#FF2D55'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 30px -5px rgba(139, 126, 116, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .ios-blur {
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+        /* Responsive nav */
+        @media (max-width: 380px) {
+            .nav-item span { font-size: 9px !important; }
+            .nav-item i { font-size: 16px !important; }
+        }
+    </style>
+    
+    <!-- Auth & Settings Modules -->
+    <script src="src/auth.js"></script>
+    <script src="src/settings.js"></script>
+</head>
+<body class="bg-sand-200 text-sand-600 min-h-screen flex justify-center font-sans">
+
+    <div class="w-full max-w-md bg-sand-200 min-h-screen shadow-2xl relative flex flex-col overflow-hidden">
+
+    <div class="relative h-80 w-full">
+            <div id="coverImg" class="w-full h-full object-cover bg-gradient-to-br from-sand-200 to-sand-100 flex items-center justify-center text-sand-400 overflow-hidden">
+                <div class="text-sm">Upload a cover photo from your Relationship Profile</div>
+            </div>
+
+            <div class="absolute inset-0 bg-gradient-to-t from-sand-200 via-transparent to-black/20"></div>
+
+            <div class="absolute top-6 left-6 right-6 flex justify-between text-white/90">
+                <i id="menuBtn" class="fa-solid fa-bars text-xl"></i>
+                <i id="bellBtn" class="fa-solid fa-bell text-xl"></i>
+            </div>
+
+            <div class="absolute bottom-0 left-0 right-0 p-6">
+                <h1 id="spaceTitle" class="text-2xl font-bold text-sand-600 mb-1">Couple Name</h1>
+                <div class="flex items-center gap-2">
+                    <span id="badgeDays" class="bg-white/30 backdrop-blur-md border border-white/40 text-sand-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                        ❤️ 0 Days
+                    </span>
+                    <span id="badgeLevel" class="bg-white/30 backdrop-blur-md border border-white/40 text-sand-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                        Level 0 Couple
+                    </span>
+                </div>
+
+                <!-- Progress bar: subtle visual indicator of time together (year progress) -->
+                <div class="mt-3">
+                    <div class="w-full bg-sand-100 rounded-full h-2 overflow-hidden">
+                        <div id="progressFill" class="bg-clay h-2 w-0 transition-all duration-500"></div>
+                    </div>
+                    <div id="progressLabel" class="text-xs text-white/80 mt-1">Year progress: 0% (0/365)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar pb-24 -mt-4 z-10">
+            
+            <div class="bg-sand-200 rounded-t-[30px] px-6 pt-6 min-h-full">
+
+                <div id="complimentCard" class="bg-ios-card p-5 rounded-2xl mb-8 border border-ios-separator/30 relative overflow-hidden group shadow-soft">
+                    <i class="fa-solid fa-quote-right absolute -right-2 -bottom-4 text-8xl text-sand-100 opacity-50 group-hover:scale-110 transition-transform"></i>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-[13px] font-semibold text-ios-text tracking-tight">Daily Compliment</h3>
+                            <span id="cycleHint" class="text-[11px] text-ios-secondary">Add compliments ↻</span>
+                        </div>
+                        <p id="complimentText" class="text-lg font-medium text-ios-text leading-snug">Share compliments with each other here.</p>
+                        <div class="mt-4 flex gap-2">
+                            <button id="likeBtn" class="bg-sand-100 hover:bg-ios-pink hover:text-white transition-colors text-sand-500 rounded-full w-8 h-8 flex items-center justify-center text-sm">❤️</button>
+                            <button id="awwBtn" class="bg-sand-100 hover:bg-ios-orange hover:text-white transition-colors text-sand-500 rounded-full w-8 h-8 flex items-center justify-center text-sm">🥺</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-3 mb-8">
+                    <div class="group cursor-pointer" onclick="window.location.href='calendar.html'">
+                        <div class="w-14 h-14 bg-ios-card rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all border border-ios-separator/20">
+                            <span class="text-xl">📅</span>
+                        </div>
+                        <span class="text-[10px] font-medium text-ios-secondary block text-center mt-1">Dates</span>
+                    </div>
+                    <div class="group cursor-pointer" onclick="window.location.href='gallery.html?folder=all'">
+                        <div class="w-14 h-14 bg-ios-card rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all border border-ios-separator/20">
+                            <span class="text-xl">📸</span>
+                        </div>
+                        <span class="text-[10px] font-medium text-ios-secondary block text-center mt-1">Gallery</span>
+                    </div>
+                    <div class="group cursor-pointer" onclick="window.location.href='journey.html'">
+                        <div class="w-14 h-14 bg-ios-card rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all border border-ios-separator/20">
+                            <span class="text-xl">📔</span>
+                        </div>
+                        <span class="text-[10px] font-medium text-ios-secondary block text-center mt-1">Journal</span>
+                    </div>
+                    <div class="group cursor-pointer" onclick="window.location.href='goals.html'">
+                        <div class="w-14 h-14 bg-ios-card rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all border border-ios-separator/20">
+                            <span class="text-xl">🎯</span>
+                        </div>
+                        <span class="text-[10px] font-medium text-ios-secondary block text-center mt-1">Goals</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-3 mb-8">
+                    <div class="group cursor-pointer" onclick="window.location.href='resolutions.html'">
+                        <div class="w-14 h-14 bg-ios-card rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all border border-ios-separator/20">
+                            <span class="text-xl">🏳️</span>
+                        </div>
+                        <span class="text-[10px] font-medium text-ios-secondary block text-center mt-1">Resolutions</span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div id="postBox" class="bg-ios-card rounded-2xl p-2 pr-3 shadow-soft flex items-center gap-3 border border-ios-separator/20">
+                        <div class="w-10 h-10 rounded-full bg-sand-200 overflow-hidden flex-shrink-0" id="postAvatar">
+                        </div>
+                        <select id="postAuthor" class="bg-transparent text-ios-text text-sm font-medium">
+                            <!-- options injected -->
+                        </select>
+                        <input id="postInput" type="text" placeholder="Post a memory, thought, or quote..." 
+                            class="flex-1 bg-transparent border-none focus:ring-0 text-sm text-ios-text placeholder-ios-secondary outline-none">
+                        <button id="postSend" class="bg-ios-blue text-white rounded-xl w-10 h-10 flex items-center justify-center shadow-md hover:opacity-90 transition-opacity">
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Events / Timeline -->
+                <h4 class="text-[13px] font-semibold text-ios-text mb-3 px-1">Events · Timeline</h4>
+
+                <!-- Subsections row (scrollable) -->
+                <div id="subsections" class="flex gap-3 overflow-x-auto no-scrollbar mb-4 py-2">
+                    <!-- buttons injected -->
+                </div>
+
+                <div id="eventsList" class="space-y-4 pb-20">
+                    <!-- events injected here -->
+                </div>
+
+            </div>
+        </div>
+
+        <!-- iOS-Style Bottom Navigation -->
+        <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 ios-blur border-t border-ios-separator/30 px-2 sm:px-4 py-2 flex justify-around items-center z-40 themed-card">
+            <button id="navHome" class="nav-item flex flex-col items-center gap-0.5 py-1 px-1">
+                <i class="fas fa-home text-ios-blue text-lg sm:text-xl themed-accent"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-blue font-medium themed-accent">Home</span>
+            </button>
+            <button onclick="window.location.href='calendar.html'" class="nav-item flex flex-col items-center gap-0.5 py-1 px-1">
+                <i class="fas fa-calendar text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Calendar</span>
+            </button>
+            
+            <button id="navAdd" class="bg-clay text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full -mt-5 sm:-mt-6 shadow-lg shadow-clay/40 flex items-center justify-center text-lg sm:text-xl hover:scale-105 transition transform themed-accent-bg">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+
+            <button onclick="window.location.href='chat.html'" class="nav-item flex flex-col items-center gap-0.5 py-1 px-1">
+                <i class="fas fa-comments text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Chat</span>
+            </button>
+            <button onclick="openSettings()" class="nav-item flex flex-col items-center gap-0.5 py-1 px-1">
+                <i class="fas fa-bars text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">More</span>
+            </button>
+        </div>
+
+        <!-- Add Event Modal -->
+        <div id="eventModal" class="fixed inset-0 hidden items-center justify-center z-50 bg-black/40">
+            <div class="bg-ios-card rounded-2xl p-5 w-11/12 max-w-md shadow-xl">
+                <h3 class="font-semibold text-ios-text text-lg mb-3">Add Event</h3>
+                <div class="space-y-3">
+                    <input id="evtTitle" placeholder="Title (e.g. First trip together)" class="w-full bg-sand-100 rounded-xl p-3 outline-none text-ios-text placeholder-ios-secondary text-sm">
+                    <input id="evtDate" type="datetime-local" class="w-full bg-sand-100 rounded-xl p-3 outline-none text-ios-text text-sm">
+                    <select id="evtType" class="w-full bg-sand-100 rounded-xl p-3 outline-none text-ios-text text-sm">
+                        <option value="memory">Memory</option>
+                        <option value="date">Date</option>
+                        <option value="fight">Fight</option>
+                        <option value="milestone">Milestone</option>
+                        <option value="trip">Trip</option>
+                        <option value="gift">Gift</option>
+                    </select>
+                    <textarea id="evtDesc" rows="3" placeholder="Description" class="w-full bg-sand-100 rounded-xl p-3 outline-none text-ios-text placeholder-ios-secondary text-sm"></textarea>
+                    <div class="flex gap-2 items-center">
+                        <label class="text-sm text-ios-text font-medium">Mood</label>
+                        <select id="evtMood" class="bg-sand-100 rounded-xl p-2 text-sm">
+                            <option value="love">❤️</option>
+                            <option value="neutral">😐</option>
+                            <option value="sad">😢</option>
+                            <option value="angry">😡</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <label class="text-sm text-ios-text font-medium">Energy</label>
+                        <select id="evtEnergy" class="bg-sand-100 rounded-xl p-2 text-sm">
+                            <option value="">-</option>
+                            <option value="1">⚡ 1</option>
+                            <option value="2">⚡⚡ 2</option>
+                            <option value="3">⚡⚡⚡ 3</option>
+                            <option value="4">⚡⚡⚡⚡ 4</option>
+                            <option value="5">⚡⚡⚡⚡⚡ 5</option>
+                        </select>
+                        <label class="text-sm text-ios-text font-medium ml-4">Visibility</label>
+                        <select id="evtVisibility" class="bg-sand-100 rounded-xl p-2 text-sm">
+                            <option value="shared">Shared</option>
+                            <option value="private">Private</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input id="evtPhotos" type="file" accept="image/*" class="hidden" multiple>
+                        <button id="evtUpload" class="px-3 py-2 rounded-xl bg-sand-100 text-ios-blue text-sm font-medium">Upload photo(s)</button>
+                        <div id="evtPreview" class="flex gap-2"></div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button id="evtCancel" class="px-4 py-2 rounded-xl bg-sand-100 text-ios-text text-sm font-medium">Cancel</button>
+                    <button id="evtSave" class="px-4 py-2 rounded-xl bg-ios-blue text-white text-sm font-medium">Save event</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // utilities
+        function loadUser(){
+            try{ return JSON.parse(localStorage.getItem('loveloggy_user')||'null'); }catch(e){return null}
+        }
+        function loadEntries(){
+            try{ return JSON.parse(localStorage.getItem('loveloggy_entries')||'[]'); }catch(e){return []}
+        }
+        function saveEntries(arr){ localStorage.setItem('loveloggy_entries', JSON.stringify(arr)); }
+        function daysTogether(startDate){
+            try{ const ms=24*60*60*1000; const diff=Math.floor((new Date()-new Date(startDate))/ms); return diff>=0?diff:0;}catch(e){return 0}
+        }
+
+        // compliments
+        const compliments = [];
+        let complimentIndex = 0;
+
+        function cycleCompliment(){
+            if(compliments.length === 0) return;
+            complimentIndex = (complimentIndex + 1) % compliments.length;
+            document.getElementById('complimentText').textContent = compliments[complimentIndex];
+        }
+
+        // render moments
+        function loadEvents(){
+            try{ return JSON.parse(localStorage.getItem('loveloggy_events')||'[]'); }catch(e){return []}
+        }
+        function saveEvents(arr){ localStorage.setItem('loveloggy_events', JSON.stringify(arr)); }
+
+        // subsections (types)
+        const subsections = [{id:'all',label:'All'}, {id:'date',label:'Dates'}, {id:'memory',label:'Memories'}, {id:'trip',label:'Trips'}, {id:'gift',label:'Gifts'}, {id:'milestone',label:'Milestones'}, {id:'fight',label:'Fights'}];
+        let activeSub = 'all';
+
+        function renderSubsections(){
+            const cont = document.getElementById('subsections');
+            cont.innerHTML = '';
+            subsections.forEach(s=>{
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-2 rounded-full ${s.id===activeSub? 'bg-clay text-white':'bg-sand-100 text-sand-500'}`;
+                btn.textContent = s.label;
+                btn.addEventListener('click', ()=>{ activeSub = s.id; renderEvents(); renderSubsections(); });
+                cont.appendChild(btn);
+            });
+        }
+
+        function renderEvents(){
+            const list = document.getElementById('eventsList');
+            list.innerHTML = '';
+            const events = loadEvents();
+            const user = loadUser();
+            const filtered = events.filter(ev => activeSub==='all' ? true : (ev.type === activeSub));
+            if(filtered.length===0){
+                list.innerHTML = '<p class="text-xs text-sand-400">No events yet — add one with the + button.</p>';
+                return;
+            }
+            filtered.sort((a,b)=> new Date(b.datetime) - new Date(a.datetime));
+            filtered.forEach(ev=>{
+                // skip private events not by current user
+                if(ev.visibility==='private' && user && ev.author !== user.name) return;
+                
+                // Get proper avatar
+                let avatarHtml = '';
+                if (ev.author === (user?.name) && user?.profilePic) {
+                    avatarHtml = `<img src="${user.profilePic}" class="w-full h-full object-cover">`;
+                } else if (ev.author === user?.partnerName && user?.partnerPhoto) {
+                    avatarHtml = `<img src="${user.partnerPhoto}" class="w-full h-full object-cover">`;
+                } else {
+                    avatarHtml = `<div class="w-full h-full bg-clay flex items-center justify-center"><i class="fas fa-user text-white text-xs"></i></div>`;
+                }
+                
+                const el = document.createElement('div');
+                el.className = 'bg-white rounded-3xl p-4 mb-4 shadow-sm border border-sand-50';
+                el.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full overflow-hidden">
+                                ${avatarHtml}
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-sand-600">${ev.title}</p>
+                                <p class="text-[10px] text-sand-400">${new Date(ev.datetime).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div class="text-xs text-sand-400">${ev.type}</div>
+                    </div>
+                    ${ev.photos && ev.photos.length? `<div class="mb-3 grid grid-cols-2 gap-2">${ev.photos.map(p=>`<div class="rounded-lg overflow-hidden"><img src="${p}" class="w-full h-28 object-cover"></div>`).join('')}</div>`:''}
+                    <p class="text-sm text-sand-600 mb-2">${ev.description}</p>
+                    <div class="flex items-center justify-between text-xs text-sand-400">
+                        <div class="flex items-center gap-2">
+                            <span>${ev.mood==='love'?'❤️': ev.mood==='neutral'?'😐': ev.mood==='sad'?'😢':'😡'}</span>
+                            ${ev.energy ? `<span class="text-[10px]">${'⚡'.repeat(parseInt(ev.energy))}</span>` : ''}
+                        </div>
+                        <div>${ev.visibility==='private' ? 'Private' : 'Shared'}</div>
+                    </div>
+                `;
+                list.appendChild(el);
+            });
+        }
+        function renderMoments(){
+            const container = document.getElementById('momentsList');
+            container.innerHTML = '';
+            let entries = loadEntries();
+            
+            if(entries.length===0){
+                container.innerHTML = '<p class="text-xs text-sand-400 text-center py-8">No moments yet. Share your first memory together!</p>';
+                return;
+            }
+
+            entries.sort((a,b)=> new Date(b.time)-new Date(a.time));
+            
+            const user = loadUser();
+
+            entries.forEach(e=>{
+                const el = document.createElement('div');
+                el.className = e.image ? 'bg-sand-100 rounded-3xl p-4 mb-4 shadow-sm' : 'bg-white rounded-3xl p-4 mb-4 shadow-sm border border-sand-50';
+                
+                // Get proper avatar - no placeholder URLs
+                let avatarHtml = '';
+                if (e.author === (user?.name || 'You') && user?.profilePic) {
+                    avatarHtml = `<img src="${user.profilePic}" alt="avatar" class="w-full h-full object-cover">`;
+                } else if (e.author === user?.partnerName && user?.partnerPhoto) {
+                    avatarHtml = `<img src="${user.partnerPhoto}" alt="avatar" class="w-full h-full object-cover">`;
+                } else {
+                    avatarHtml = `<div class="w-full h-full bg-clay flex items-center justify-center"><i class="fas fa-user text-white text-xs"></i></div>`;
+                }
+                
+                el.innerHTML = `
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-full overflow-hidden">
+                            ${avatarHtml}
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-sand-600">${e.author}</p>
+                            <p class="text-[10px] text-sand-400">${timeAgo(e.time)}</p>
+                        </div>
+                    </div>
+                    ${e.image? `<div class="aspect-video w-full rounded-2xl overflow-hidden mb-3"><img src="${e.image}" class="w-full h-full object-cover"></div>`: ''}
+                    <p class="text-sm text-sand-600">${e.text}</p>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        function timeAgo(iso){
+            const d = new Date(iso); const diff = Date.now()-d; const mins = Math.floor(diff/60000);
+            if(mins<60) return mins+' min ago'; const hrs = Math.floor(mins/60); if(hrs<24) return hrs+' hr ago'; const days=Math.floor(hrs/24); return days+' day'+(days>1?'s':'')+' ago';
+        }
+
+        // post handler
+        function postMoment(){
+            const input = document.getElementById('postInput');
+            const text = input.value.trim();
+            if(!text) return;
+            const entries = loadEntries();
+            const author = document.getElementById('postAuthor').value || (loadUser() && loadUser().name) || 'You';
+            entries.push({ id: Date.now(), author, time: new Date().toISOString(), text, image: '' });
+            saveEntries(entries);
+            input.value = '';
+            renderMoments();
+        }
+
+        document.addEventListener('DOMContentLoaded', ()=>{
+            const user = loadUser();
+            if(user){
+                const days = daysTogether(user.startDate);
+                document.getElementById('spaceTitle').textContent = `${user.name} & ${user.partnerName || 'Partner'}`;
+                document.getElementById('badgeDays').textContent = `❤️ ${days} Days`;
+                document.getElementById('badgeLevel').textContent = `Level 5 Couple`;
+                if(user.profilePic) document.getElementById('postAvatar').innerHTML = `<img src="${user.profilePic}" class="w-full h-full object-cover">`;
+
+                // set cover image from profile partnerPhoto if provided
+                if(user.partnerPhoto){
+                    const cover = document.getElementById('coverImg');
+                    cover.innerHTML = `<img src="${user.partnerPhoto}" class="w-full h-full object-cover">`;
+                }
+
+                // progress toward first year together (subtle indicator)
+                const percent = Math.min(100, Math.round((days/365)*100));
+                document.getElementById('progressFill').style.width = percent + '%';
+                document.getElementById('progressLabel').textContent = `Year progress: ${percent}% (${days}/365)`;
+            } else {
+                document.getElementById('spaceTitle').textContent = 'You & Partner';
+                document.getElementById('postAvatar').innerHTML = `<div class="w-full h-full bg-clay flex items-center justify-center"><i class="fas fa-user text-white"></i></div>`;
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('progressLabel').textContent = `Year progress: 0% (0/365)`;
+            }
+
+            // event modal handlers and uploading
+            function openEventModal(){ document.getElementById('eventModal').classList.remove('hidden'); document.getElementById('eventModal').classList.add('flex'); }
+            function closeEventModal(){ document.getElementById('eventModal').classList.add('hidden'); document.getElementById('eventModal').classList.remove('flex'); }
+
+            document.getElementById('evtUpload').addEventListener('click', ()=> document.getElementById('evtPhotos').click());
+            document.getElementById('evtPhotos').addEventListener('change', (e)=>{
+                const files = Array.from(e.target.files || []);
+                const preview = document.getElementById('evtPreview'); preview.innerHTML = '';
+                files.forEach(f=>{
+                    const reader = new FileReader();
+                    reader.onload = (ev)=>{
+                        const img = document.createElement('img'); img.src = ev.target.result; img.className='w-20 h-20 object-cover rounded-md';
+                        preview.appendChild(img);
+                        // store temporarily on window for save
+                        window._evt_photos = window._evt_photos || []; window._evt_photos.push(ev.target.result);
+                    };
+                    reader.readAsDataURL(f);
+                });
+            });
+
+            document.getElementById('evtCancel').addEventListener('click', ()=>{ window._evt_photos=[]; closeEventModal(); });
+            document.getElementById('evtSave').addEventListener('click', ()=>{
+                const title = document.getElementById('evtTitle').value.trim() || 'Event';
+                const datetime = document.getElementById('evtDate').value || new Date().toISOString();
+                const type = document.getElementById('evtType').value || 'memory';
+                const description = document.getElementById('evtDesc').value.trim() || '';
+                const mood = document.getElementById('evtMood').value || 'neutral';
+                const energy = document.getElementById('evtEnergy').value || null;
+                const visibility = document.getElementById('evtVisibility').value || 'shared';
+                const photos = window._evt_photos || [];
+                const user = loadUser();
+                const author = user? user.name : 'You';
+                const events = loadEvents();
+                events.push({ id: Date.now(), title, datetime, type, description, mood, energy, photos, visibility, author });
+                saveEvents(events);
+                window._evt_photos = [];
+                document.getElementById('evtPreview').innerHTML='';
+                closeEventModal();
+                renderEvents();
+            });
+
+            // wire interactions
+            document.getElementById('complimentCard').addEventListener('click', cycleCompliment);
+            document.getElementById('postSend').addEventListener('click', postMoment);
+            document.getElementById('postInput').addEventListener('keypress', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); postMoment(); } });
+            document.getElementById('navHome').addEventListener('click', ()=>{ window.location.href='space.html'; });
+            document.getElementById('navAdd').addEventListener('click', ()=>{ openEventModal(); });
+
+            // populate post author select
+            const authorSelect = document.getElementById('postAuthor');
+            authorSelect.innerHTML = '';
+            if(user){
+                const opt1 = document.createElement('option'); opt1.value = user.name; opt1.textContent = user.name; authorSelect.appendChild(opt1);
+                if(user.partnerName){ const opt2 = document.createElement('option'); opt2.value = user.partnerName; opt2.textContent = user.partnerName; authorSelect.appendChild(opt2); }
+            } else {
+                const opt = document.createElement('option'); opt.value='You'; opt.textContent='You'; authorSelect.appendChild(opt);
+            }
+
+            renderSubsections();
+            renderEvents();
+        });
+    </script>
+</body>
+</html>

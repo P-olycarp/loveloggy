@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>LoveLoggy E2E Roundtrip Test</title>
+  <script src="src/encryption.js"></script>
+  <style>body{font-family:system-ui,Segoe UI,Roboto,sans-serif;padding:20px}</style>
+</head>
+<body>
+  <h2>ECDH + AES-GCM Roundtrip Test</h2>
+  <p id="status">Ready</p>
+  <button id="run">Run test</button>
+  <pre id="out"></pre>
+
+  <script>
+    const out = document.getElementById('out');
+    const status = document.getElementById('status');
+    function log(...args){ out.textContent += args.join(' ') + '\n'; }
+
+    document.getElementById('run').onclick = async () => {
+      out.textContent = '';
+      status.textContent = 'Running...';
+      try{
+        // Generate keypairs for Alice & Bob
+        log('Generating Alice keypair...');
+        const alice = await LoveLoggyEncryption.generateKeyPair();
+        const alicePub = await LoveLoggyEncryption.exportPublicKeyJwk(alice.publicKey);
+        const alicePriv = await crypto.subtle.exportKey('jwk', alice.privateKey);
+
+        log('Generating Bob keypair...');
+        const bob = await LoveLoggyEncryption.generateKeyPair();
+        const bobPub = await LoveLoggyEncryption.exportPublicKeyJwk(bob.publicKey);
+        const bobPriv = await crypto.subtle.exportKey('jwk', bob.privateKey);
+
+        log('Importing private keys...');
+        const alicePrivKey = await crypto.subtle.importKey('jwk', alicePriv, { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
+        const bobPrivKey = await crypto.subtle.importKey('jwk', bobPriv, { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
+
+        log('Deriving shared AES keys...');
+        const aliceAes = await LoveLoggyEncryption.deriveAesKeyFromPrivate(alicePrivKey, bobPub);
+        const bobAes = await LoveLoggyEncryption.deriveAesKeyFromPrivate(bobPrivKey, alicePub);
+
+        log('Encrypting message with Alice key...');
+        const payload = { text: 'Hello from Alice', ts: new Date().toISOString() };
+        const { iv, ciphertext } = await LoveLoggyEncryption.encryptMessageObject(aliceAes, payload);
+        log('Ciphertext:', ciphertext);
+        log('IV:', iv);
+
+        log('Decrypting with Bob key...');
+        const decrypted = await LoveLoggyEncryption.decryptMessageObject(bobAes, ciphertext, iv);
+        log('Decrypted:', JSON.stringify(decrypted));
+
+        const ok = decrypted && decrypted.text === payload.text;
+        status.textContent = ok ? 'SUCCESS: Roundtrip matches' : 'FAIL: Roundtrip mismatch';
+      }catch(e){
+        status.textContent = 'ERROR';
+        log('Error:', e.message || e);
+      }
+    };
+  </script>
+</body>
+</html>

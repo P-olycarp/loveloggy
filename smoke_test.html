@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>LoveLoggy Smoke Test</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body>
+  <h2>Smoke Test: Signup → Create Couple → Register Keys → Send Encrypted Msg</h2>
+  <pre id="out"></pre>
+  <script>
+    const out = (s)=> document.getElementById('out').textContent += s + '\n';
+    const API = 'http://localhost:3000/api';
+
+    async function run(){
+      out('Starting smoke test...');
+      // Signup user A
+      const a = { name: 'Alice', email: 'alice@example.com', password: 'password123' };
+      let r = await fetch(`${API}/signup`, {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify(a)});
+      const resA = await r.json();
+      out('User A signup: ' + JSON.stringify(resA));
+      const userA = resA.user;
+      const couple = resA.couple;
+
+      // Signup user B and join using invite
+      const b = { name: 'Bob', email: 'bob@example.com', password: 'password123', inviteCode: couple.inviteCode };
+      r = await fetch(`${API}/signup`, {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify(b)});
+      const resB = await r.json();
+      out('User B signup/join: ' + JSON.stringify(resB));
+      const userB = resB.user || resB.user;
+
+      // Each generate ECDH key pair and send public key
+      async function genAndRegister(user, coupleId){
+        const kp = await window.crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'}, true, ['deriveKey','deriveBits']);
+        const pub = await window.crypto.subtle.exportKey('jwk', kp.publicKey);
+        await fetch(`${API}/keys/register`, {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({ coupleId, userId: user.id, publicKeyJwk: pub })});
+        out(`Registered key for ${user.name}`);
+        return kp;
+      }
+
+      const kpA = await genAndRegister(resA.user, couple.id);
+      const kpB = await genAndRegister(resB.user, couple.id);
+
+      // Fetch partner key for A
+      const partnerKeyResp = await fetch(`${API}/keys/partner/${couple.id}/${resA.user.id}`);
+      const partnerKeyJson = await partnerKeyResp.json();
+      out('Fetched partner key for A');
+
+      const partnerPub = await window.crypto.subtle.importKey('jwk', partnerKeyJson.publicKeyJwk, {name:'ECDH',namedCurve:'P-256'}, true, []);
+      const derivedA = await window.crypto.subtle.deriveKey({name:'ECDH', public: partnerPub}, kpA.privateKey, { name: 'AES-GCM', length: 256 }, true, ['encrypt','decrypt']);
+      out('Derived shared key for A');
+
+      // A encrypts a message and posts it
+      const enc = new TextEncoder();
+      const plaintext = enc.encode('Hello from Alice (encrypted)');
+      const iv = window.crypto.getRandomValues(new Uint8Array(12));
+      const ciphertext = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, derivedA, plaintext);
+      const ctBase64 = btoa(String.fromCharCode(...new Uint8Array(ciphertext)));
+      const ivBase64 = btoa(String.fromCharCode(...iv));
+
+      await fetch(`${API}/messages`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ coupleId: couple.id, senderId: resA.user.id, ciphertext: ctBase64, iv: ivBase64 })});
+      out('Posted encrypted message');
+
+      // Fetch messages
+      const msgsR = await fetch(`${API}/messages/${couple.id}`);
+      const msgsJson = await msgsR.json();
+      out('Messages on server: ' + JSON.stringify(msgsJson));
+
+      out('Smoke test complete.');
+    }
+
+    run().catch(e=> out('Error: '+e.message));
+  </script>
+</body>
+</html>

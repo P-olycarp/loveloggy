@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  loveloggy:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - ./server/db.json:/app/server/db.json
+    restart: unless-stopped

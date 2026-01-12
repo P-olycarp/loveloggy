@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Goals • LoveLoggy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'DM Sans', 'sans-serif']
+                    },
+                    colors: {
+                        sand: {
+                            50: '#F7F5F2',
+                            100: '#EBE7E0',
+                            200: '#EBE7E0',
+                            300: '#A69C8E',
+                            500: '#8B7E74',
+                            600: '#5D5752'
+                        },
+                        clay: '#9E8C78',
+                        ios: {
+                            blue: '#007AFF',
+                            bg: '#EBE7E0',
+                            card: '#FFFFFF',
+                            separator: '#C6C6C8',
+                            text: '#000000',
+                            secondary: '#8E8E93',
+                            red: '#FF3B30',
+                            green: '#34C759'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .ios-blur {
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+        @media (max-width: 380px) {
+            .nav-item span { font-size: 9px !important; }
+            .nav-item i { font-size: 18px !important; }
+        }
+    </style>
+    <script src="src/auth.js"></script>
+    <script src="src/settings.js"></script>
+</head>
+<body class="bg-ios-bg font-sans">
+    <div class="max-w-md mx-auto bg-ios-bg min-h-screen relative">
+        <!-- Header -->
+        <div class="px-4 pt-6 pb-4 bg-ios-bg/90 ios-blur sticky top-0 z-10 border-b border-ios-separator/30">
+            <div class="flex items-center justify-between mb-2">
+                <h1 class="text-2xl font-bold text-ios-text">Our Goals</h1>
+                <button id="addGoalBtn" class="bg-ios-blue text-white text-sm px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all">
+                    + Add Goal
+                </button>
+            </div>
+            <p class="text-xs text-ios-secondary">Dreams we're working toward together</p>
+        </div>
+
+        <!-- Content -->
+        <div class="px-4 pb-24">
+            <!-- Goals List -->
+            <div id="goalsList" class="space-y-3">
+                <!-- Goals will be injected here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-12">
+                <span class="text-6xl mb-4 block">🎯</span>
+                <p class="text-ios-secondary text-sm mb-2">No goals yet</p>
+                <p class="text-ios-secondary/70 text-xs">Set your first shared goal!</p>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 ios-blur border-t border-ios-separator/30 px-2 sm:px-6 py-2 flex justify-around items-center z-40 themed-card">
+            <button onclick="window.location.href='space.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1 sm:px-2">
+                <i class="fas fa-home text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Home</span>
+            </button>
+            <button onclick="window.location.href='calendar.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1 sm:px-2">
+                <i class="fas fa-calendar text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Calendar</span>
+            </button>
+            <button onclick="window.location.href='journey.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1 sm:px-2">
+                <i class="fas fa-heart text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Journey</span>
+            </button>
+            <button onclick="window.location.href='chat.html'" class="nav-item flex flex-col items-center gap-1 py-1 px-1 sm:px-2">
+                <i class="fas fa-comments text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">Chat</span>
+            </button>
+            <button onclick="openSettings()" class="nav-item flex flex-col items-center gap-1 py-1 px-1 sm:px-2">
+                <i class="fas fa-bars text-ios-secondary text-lg sm:text-xl themed-text-secondary"></i>
+                <span class="text-[9px] sm:text-[10px] text-ios-secondary themed-text-secondary">More</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Add Goal Modal -->
+    <div id="addGoalModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-ios-card rounded-2xl p-6 w-full max-w-sm border border-ios-separator/30">
+            <h3 class="text-xl font-bold text-ios-text mb-4">Add Goal</h3>
+            
+            <input type="text" id="goalTitle" placeholder="Goal title (e.g., Save for vacation)" class="w-full px-4 py-3 rounded-xl bg-ios-bg border border-ios-separator/30 focus:outline-none focus:ring-2 focus:ring-ios-blue mb-3 text-sm text-ios-text">
+            
+            <textarea id="goalDescription" placeholder="Details (optional)" class="w-full px-4 py-3 rounded-xl bg-ios-bg border border-ios-separator/30 focus:outline-none focus:ring-2 focus:ring-ios-blue mb-3 text-sm h-24 resize-none text-ios-text"></textarea>
+            
+            <select id="goalCategory" class="w-full px-4 py-3 rounded-xl bg-ios-bg border border-ios-separator/30 focus:outline-none focus:ring-2 focus:ring-ios-blue mb-4 text-sm text-ios-text">
+                <option value="💰">💰 Financial</option>
+                <option value="✈️">✈️ Travel</option>
+                <option value="🏠">🏠 Home</option>
+                <option value="💍">💍 Relationship</option>
+                <option value="🎯">🎯 Personal Growth</option>
+                <option value="🎉">🎉 Other</option>
+            </select>
+
+            <div class="flex gap-3">
+                <button id="cancelGoalBtn" class="flex-1 py-3 rounded-xl bg-ios-bg text-ios-text font-medium text-sm border border-ios-separator/30">Cancel</button>
+                <button id="saveGoalBtn" class="flex-1 py-3 rounded-xl bg-ios-blue text-white font-medium text-sm">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script>
+        // Check login via auth module
+        const user = window.LoveLoggyAuth && LoveLoggyAuth.getCurrentUser ? LoveLoggyAuth.getCurrentUser() : JSON.parse(localStorage.getItem('loveloggy_user') || 'null');
+        if (!user) {
+            window.location.href = 'index.html';
+        }
+
+        // Load goals
+        function loadGoals() {
+            const goals = JSON.parse(localStorage.getItem('loveloggy_goals') || '[]');
+            return goals;
+        }
+
+        function saveGoals(goals) {
+            localStorage.setItem('loveloggy_goals', JSON.stringify(goals));
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Render goals
+        function render() {
+            const goals = loadGoals();
+            const list = document.getElementById('goalsList');
+            const empty = document.getElementById('emptyState');
+
+            if (goals.length === 0) {
+                empty.classList.remove('hidden');
+                list.innerHTML = '';
+                return;
+            }
+
+            empty.classList.add('hidden');
+            list.innerHTML = goals.map((g, i) => `
+                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleGoal(${i})" class="mt-1 w-5 h-5 rounded border-sand-300 text-clay focus:ring-clay cursor-pointer">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-2xl">${g.category}</span>
+                                <h4 class="text-sm font-bold text-sand-600 ${g.completed ? 'line-through opacity-50' : ''}">${escapeHtml(g.title)}</h4>
+                            </div>
+                            ${g.description ? `<p class="text-xs text-sand-400 mb-2 ${g.completed ? 'line-through opacity-50' : ''}">${escapeHtml(g.description)}</p>` : ''}
+                            <p class="text-[10px] text-sand-300">Added ${formatDate(g.createdAt)}</p>
+                        </div>
+                        <button onclick="deleteGoal(${i})" class="text-red-400 hover:text-red-600">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleGoal(index) {
+            const goals = loadGoals();
+            goals[index].completed = !goals[index].completed;
+            saveGoals(goals);
+            render();
+        }
+
+        function deleteGoal(index) {
+            if (!confirm('Delete this goal?')) return;
+            const goals = loadGoals();
+            goals.splice(index, 1);
+            saveGoals(goals);
+            render();
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+        }
+
+        // Modal handlers
+        const modal = document.getElementById('addGoalModal');
+        document.getElementById('addGoalBtn').onclick = () => modal.classList.remove('hidden');
+        document.getElementById('fabBtn').onclick = () => modal.classList.remove('hidden');
+        document.getElementById('cancelGoalBtn').onclick = () => {
+            modal.classList.add('hidden');
+            document.getElementById('goalTitle').value = '';
+            document.getElementById('goalDescription').value = '';
+        };
+
+        document.getElementById('saveGoalBtn').onclick = () => {
+            const title = document.getElementById('goalTitle').value.trim();
+            const description = document.getElementById('goalDescription').value.trim();
+            const category = document.getElementById('goalCategory').value;
+
+            if (!title) {
+                alert('Please enter a goal title');
+                return;
+            }
+
+            const goals = loadGoals();
+            goals.push({
+                title,
+                description,
+                category,
+                completed: false,
+                createdAt: new Date().toISOString()
+            });
+            saveGoals(goals);
+            
+            modal.classList.add('hidden');
+            document.getElementById('goalTitle').value = '';
+            document.getElementById('goalDescription').value = '';
+            render();
+        };
+
+        render();
+    </script>
+</body>
+</html>
