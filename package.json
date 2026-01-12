@@ -1,0 +1,16 @@
+{
+  "name": "loveloggy",
+  "version": "1.0.0",
+  "description": "LoveLoggy - Private 1-to-1 encrypted couples app",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "build": "cd server && npm install"
+  },
+  "engines": {
+    "node": ">=18.x"
+  },
+  "keywords": ["couples", "relationship", "encrypted", "private"],
+  "author": "",
+  "license": "MIT"
+}
